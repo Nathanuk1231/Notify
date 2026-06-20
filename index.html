@@ -3,315 +3,455 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>NOT-ify — Music for Verified Humans Only</title>
+<title>NOT-ify Ultra Hard — Barely Usable Music Player</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 <style>
   :root{
-    --bg:#0b0b0d;
-    --bg-elevated:#161618;
-    --bg-hover:#232325;
+    --bg:#08080a;
+    --bg2:#121216;
+    --card:#17171b;
+    --hover:#25252b;
     --accent:#1ed760;
-    --accent-dim:#15a34a;
+    --accent2:#20f878;
     --danger:#ff4d4d;
     --warn:#ffb020;
-    --text:#ffffff;
-    --text-dim:#a3a3a7;
-    --border:#2a2a2d;
-    --radius:10px;
+    --text:#fff;
+    --muted:#aaaab2;
+    --border:#2d2d35;
+    --radius:14px;
   }
-  *{box-sizing:border-box;}
-  html,body{height:100%;}
+  *{box-sizing:border-box}
+  html,body{height:100%}
   body{
     margin:0;
     background:var(--bg);
     color:var(--text);
-    font-family:'Inter',sans-serif;
+    font-family:Inter,system-ui,sans-serif;
     overflow:hidden;
   }
-  h1,h2,h3,.brand,button{font-family:'Poppins',sans-serif;}
-
+  h1,h2,h3,.brand,button{font-family:Poppins,system-ui,sans-serif}
+  button,input,textarea{font:inherit}
   .app{
     display:grid;
-    grid-template-columns:240px 1fr;
-    grid-template-rows:1fr 90px;
+    grid-template-columns:245px 1fr;
+    grid-template-rows:1fr 94px;
     height:100vh;
   }
-
-  /* SIDEBAR */
   .sidebar{
-    grid-row:1/2;
     background:#000;
-    padding:20px 16px;
     border-right:1px solid var(--border);
+    padding:20px 15px;
     display:flex;
     flex-direction:column;
-    gap:24px;
+    gap:22px;
     overflow-y:auto;
   }
-  .brand{display:flex;align-items:center;gap:8px;font-weight:800;font-size:20px;letter-spacing:-0.5px;}
-  .brand span.dot{color:var(--accent);}
-  .tagline{font-size:11px;color:var(--text-dim);margin-top:-18px;}
-  .nav{display:flex;flex-direction:column;gap:2px;}
+  .brand{font-size:21px;font-weight:800;letter-spacing:-.6px}
+  .brand span{color:var(--accent)}
+  .tagline{font-size:11px;color:var(--muted);margin-top:-18px;line-height:1.4}
+  .nav{display:flex;flex-direction:column;gap:4px}
   .nav a{
-    color:var(--text-dim);
+    color:var(--muted);
     text-decoration:none;
     font-size:14px;
-    font-weight:600;
-    padding:8px 10px;
-    border-radius:6px;
+    font-weight:700;
+    padding:9px 10px;
+    border-radius:8px;
     cursor:pointer;
   }
-  .nav a:hover, .nav a.active{color:var(--text);background:var(--bg-hover);}
-  .library-title{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-dim);font-weight:700;margin-bottom:6px;}
-  .lib-item{
-    display:flex;align-items:center;gap:10px;
-    padding:8px;border-radius:8px;cursor:pointer;font-size:13px;color:var(--text-dim);
+  .nav a:hover,.nav a.active{background:var(--hover);color:var(--text)}
+  .library-title{
+    font-size:12px;
+    text-transform:uppercase;
+    color:var(--muted);
+    letter-spacing:.08em;
+    font-weight:800;
+    margin-bottom:8px;
   }
-  .lib-item:hover{background:var(--bg-hover);color:var(--text);}
-  .lib-icon{width:32px;height:32px;border-radius:4px;background:linear-gradient(135deg,var(--accent),#0c6b30);flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:14px;}
-
-  /* MAIN */
+  .lib-item{
+    display:flex;
+    gap:10px;
+    align-items:center;
+    color:var(--muted);
+    padding:8px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:13px;
+  }
+  .lib-item:hover{background:var(--hover);color:var(--text)}
+  .lib-icon{
+    width:34px;height:34px;
+    border-radius:6px;
+    background:linear-gradient(135deg,var(--accent),#087a35);
+    display:grid;
+    place-items:center;
+  }
   .main{
-    grid-row:1/2;
     overflow-y:auto;
-    background:linear-gradient(#1a1a1d 0%, var(--bg) 320px);
-    padding:24px 32px 40px;
+    padding:24px 32px 45px;
+    background:
+      radial-gradient(circle at top left,rgba(30,215,96,.18),transparent 370px),
+      linear-gradient(#1a1a1f 0%,var(--bg) 340px);
   }
   .topbar{
     display:flex;
     justify-content:space-between;
     align-items:center;
-    margin-bottom:28px;
+    gap:16px;
+    margin-bottom:24px;
   }
-  .robot-badge{
-    font-size:12px;
-    color:var(--text-dim);
-    background:var(--bg-elevated);
+  .status-pills{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+  .pill{
+    background:var(--card);
     border:1px solid var(--border);
-    padding:6px 12px;
     border-radius:999px;
+    color:var(--muted);
+    padding:7px 12px;
+    font-size:12px;
   }
-  .robot-badge b{color:var(--warn);}
-
+  .pill b{color:var(--accent)}
+  .pill.warn b{color:var(--warn)}
+  .pill.danger b{color:var(--danger)}
   .add-panel{
-    background:var(--bg-elevated);
+    background:rgba(23,23,27,.9);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:16px;
+    margin-bottom:28px;
+    box-shadow:0 20px 60px rgba(0,0,0,.25);
+  }
+  .add-card{
+    background:#101014;
     border:1px solid var(--border);
     border-radius:14px;
-    padding:20px 24px;
-    margin-bottom:32px;
-    display:flex;
-    gap:16px;
-    flex-wrap:wrap;
-    align-items:center;
+    padding:18px;
   }
-  .add-panel h2{margin:0 0 2px;font-size:16px;}
-  .add-panel p{margin:0;font-size:12px;color:var(--text-dim);}
-  .add-col{flex:1;min-width:240px;}
+  .add-card h2{margin:0 0 4px;font-size:16px}
+  .add-card p{margin:0 0 12px;color:var(--muted);font-size:12px;line-height:1.5}
   .btn{
-    background:var(--accent);
-    color:#04210f;
     border:none;
-    font-weight:700;
-    font-size:13px;
-    padding:10px 18px;
+    background:var(--accent);
+    color:#041d0d;
+    font-weight:800;
     border-radius:999px;
+    padding:10px 17px;
     cursor:pointer;
+    font-size:13px;
   }
-  .btn:hover{background:#22ea69;}
+  .btn:hover{background:var(--accent2)}
+  .btn:disabled{opacity:.55;cursor:not-allowed}
   .btn-secondary{
     background:transparent;
     color:var(--text);
     border:1px solid var(--border);
   }
-  .btn-secondary:hover{border-color:var(--text);}
-  .yt-row{display:flex;gap:8px;margin-top:8px;}
-  .yt-row input{
-    flex:1;
-    background:#0f0f11;
-    border:1px solid var(--border);
+  .btn-secondary:hover{border-color:var(--text);background:rgba(255,255,255,.04)}
+  .yt-row{display:flex;gap:8px}
+  .yt-row input,.modal input,.modal textarea{
+    width:100%;
+    background:#0b0b0e;
     color:var(--text);
+    border:1px solid var(--border);
+    border-radius:10px;
     padding:10px 12px;
-    border-radius:8px;
-    font-size:13px;
+    outline:none;
   }
-  .yt-row input:focus{outline:1px solid var(--accent);}
-
-  .track-list{border-top:1px solid var(--border);}
+  .yt-row input:focus,.modal input:focus,.modal textarea:focus{border-color:var(--accent)}
+  .track-list{border-top:1px solid var(--border)}
   .track-row{
     display:grid;
-    grid-template-columns:32px 1fr 90px 70px;
+    grid-template-columns:38px 1fr 92px 72px;
+    gap:13px;
     align-items:center;
-    gap:14px;
-    padding:10px 12px;
-    border-radius:8px;
+    padding:11px 12px;
+    border-radius:9px;
     cursor:pointer;
     font-size:14px;
   }
-  .track-row:hover{background:var(--bg-hover);}
-  .track-row.playing{color:var(--accent);}
-  .track-idx{color:var(--text-dim);text-align:center;}
-  .track-title{display:flex;flex-direction:column;gap:2px;overflow:hidden;}
-  .track-title .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .track-title .src{font-size:11px;color:var(--text-dim);}
-  .track-dur{color:var(--text-dim);font-size:12px;text-align:right;}
-  .empty-state{padding:50px 10px;text-align:center;color:var(--text-dim);font-size:13px;}
-
-  /* NOW PLAYING BAR */
+  .track-row:hover{background:var(--hover)}
+  .track-row.playing{color:var(--accent)}
+  .track-idx{color:var(--muted);text-align:center}
+  .track-title{display:flex;flex-direction:column;gap:2px;min-width:0}
+  .track-title .name{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .track-title .src,.track-dur{font-size:11px;color:var(--muted)}
+  .empty-state{
+    padding:54px 16px;
+    text-align:center;
+    color:var(--muted);
+    font-size:13px;
+    line-height:1.7;
+  }
   .now-bar{
     grid-column:1/3;
-    background:var(--bg-elevated);
+    background:var(--card);
     border-top:1px solid var(--border);
     display:grid;
-    grid-template-columns:240px 1fr 240px;
+    grid-template-columns:245px 1fr 245px;
     align-items:center;
+    gap:15px;
     padding:0 16px;
+  }
+  .np-left{display:flex;align-items:center;gap:12px;overflow:hidden}
+  .art{
+    width:56px;height:56px;border-radius:8px;
+    border:1px solid var(--border);
+    background:linear-gradient(135deg,#2a2a31,#0b0b0d);
+    display:grid;place-items:center;font-size:22px;flex-shrink:0;
+  }
+  .np-meta{min-width:0}
+  .np-meta .t{font-weight:700;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .np-meta .a{font-size:11px;color:var(--muted)}
+  .np-center{display:flex;flex-direction:column;align-items:center;gap:7px}
+  .transport{display:flex;align-items:center;gap:18px}
+  .transport button{background:none;border:none;color:var(--text);font-size:18px;cursor:pointer}
+  .transport .play{
+    background:var(--text);color:#000;
+    width:34px;height:34px;border-radius:50%;
+    display:grid;place-items:center;font-size:14px;
+  }
+  .progress-row{display:flex;align-items:center;gap:8px;width:100%;max-width:520px}
+  .progress-row span{font-size:10px;color:var(--muted);width:35px}
+  .progress-track{
+    flex:1;height:5px;background:#3a3a42;border-radius:999px;
+    cursor:pointer;position:relative;
+  }
+  .progress-fill{height:100%;width:0%;background:var(--text);border-radius:999px}
+  .progress-track:hover .progress-fill{background:var(--accent)}
+  .np-right{display:flex;align-items:center;justify-content:flex-end;gap:9px}
+  #volumeSlider{width:112px;accent-color:var(--accent);cursor:pointer}
+  .overlay{
+    position:fixed;inset:0;
+    background:rgba(0,0,0,.78);
+    backdrop-filter:blur(5px);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;
+  }
+  .overlay.hidden{display:none}
+  .modal{
+    width:430px;
+    max-width:92vw;
+    background:#17171b;
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:24px;
+    box-shadow:0 24px 80px rgba(0,0,0,.75);
+  }
+  .modal.wide{width:520px}
+  .modal.shake{animation:shake .35s}
+  @keyframes shake{
+    10%,90%{transform:translateX(-2px)}
+    20%,80%{transform:translateX(4px)}
+    30%,50%,70%{transform:translateX(-7px)}
+    40%,60%{transform:translateX(7px)}
+  }
+  .modal-header{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+  .modal-header .icon{font-size:24px}
+  .modal h3{margin:0;font-size:17px}
+  .sub{font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 16px}
+  .chain-status{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:8px;
+    background:#0f0f13;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:9px 11px;
+    font-size:12px;
+    color:var(--muted);
+    margin-bottom:13px;
+  }
+  .chain-status b{color:var(--accent)}
+  .challenge-box{
+    background:#0e0e12;
+    border:1px solid var(--border);
+    border-radius:14px;
+    padding:18px;
+    min-height:135px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    gap:12px;
+    overflow:hidden;
+  }
+  .status-line{font-size:12px;color:var(--muted);min-height:18px;margin-top:10px}
+  .status-line.error{color:var(--danger)}
+  .status-line.ok{color:var(--accent)}
+  .choice-grid{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .choice-grid button{
+    background:#222229;
+    border:1px solid var(--border);
+    color:var(--text);
+    width:54px;height:54px;
+    border-radius:11px;
+    cursor:pointer;
+    font-size:21px;
+  }
+  .choice-grid button:hover{border-color:var(--accent)}
+  .hint{font-size:10px;color:var(--muted);text-align:center;line-height:1.4}
+  .runaway-zone{position:relative;width:300px;height:125px}
+  .runaway-box{
+    position:absolute;top:38px;left:120px;
+    width:70px;height:38px;border-radius:9px;
+    background:#222229;
+    border:1px solid var(--accent);
+    color:var(--accent);
+    font-size:11px;font-weight:800;
+    display:grid;place-items:center;
+    cursor:pointer;user-select:none;
+    transition:top .1s,left .1s;
+  }
+  .tiny-target{
+    width:14px!important;height:14px!important;
+    font-size:0!important;border-radius:50%!important;
+    background:var(--accent)!important;
+    border:none!important;
+  }
+  .lock-card{
+    text-align:center;
+    background:#0e0e12;
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:18px;
+    margin-bottom:14px;
+  }
+  .progress-mini{
+    width:100%;height:8px;background:#2a2a31;border-radius:999px;overflow:hidden;
+  }
+  .progress-mini div{height:100%;background:var(--accent);width:100%}
+
+  .view{display:none}
+  .view.active{display:block}
+  .search-box{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    margin-bottom:20px;
+  }
+  .search-box input{
+    width:100%;
+    background:#0b0b0e;
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:999px;
+    padding:13px 16px;
+    outline:none;
+    font-size:15px;
+  }
+  .search-box input:focus{border-color:var(--accent)}
+  .search-results{border-top:1px solid var(--border)}
+  .premium-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
     gap:16px;
   }
-  .np-left{display:flex;align-items:center;gap:12px;overflow:hidden;}
-  .art{
-    width:54px;height:54px;border-radius:6px;
-    background:linear-gradient(135deg,#2b2b2e,#0e0e10);
-    display:flex;align-items:center;justify-content:center;
-    font-size:22px;flex-shrink:0;
+  .premium-card{
+    background:var(--card);
     border:1px solid var(--border);
+    border-radius:18px;
+    padding:20px;
   }
-  .np-meta{overflow:hidden;}
-  .np-meta .t{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-  .np-meta .a{font-size:11px;color:var(--text-dim);}
+  .premium-card.featured{
+    border-color:var(--accent);
+    box-shadow:0 0 35px rgba(30,215,96,.18);
+  }
+  .premium-card h2{margin:0 0 6px;font-size:18px}
+  .premium-price{font-size:28px;font-weight:900;margin:12px 0}
+  .premium-card ul{margin:12px 0 18px;padding-left:18px;color:var(--muted);font-size:13px;line-height:1.7}
+  .premium-owned{
+    display:none;
+    background:rgba(30,215,96,.1);
+    border:1px solid rgba(30,215,96,.5);
+    color:var(--accent);
+    padding:12px 14px;
+    border-radius:14px;
+    margin-bottom:18px;
+    font-weight:800;
+  }
+  .premium-owned.active{display:block}
+  .fake-payment{
+    display:grid;
+    gap:10px;
+    margin-top:12px;
+  }
+  .fake-payment input{
+    width:100%;
+    background:#0b0b0e;
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:10px 12px;
+    outline:none;
+  }
+  .fake-payment input:focus{border-color:var(--accent)}
 
-  .np-center{display:flex;flex-direction:column;align-items:center;gap:6px;}
-  .transport{display:flex;align-items:center;gap:18px;}
-  .transport button{
-    background:none;border:none;color:var(--text);font-size:18px;cursor:pointer;
+  @media(max-width:760px){
+    .app{grid-template-columns:1fr;grid-template-rows:auto 1fr 96px}
+    .sidebar{display:none}
+    .main{grid-row:1/2;padding:18px}
+    .add-panel{grid-template-columns:1fr}
+    .now-bar{grid-column:1;grid-template-columns:1fr;gap:8px;height:auto;padding:10px}
+    .np-right{justify-content:center}
   }
-  .transport .play{
-    background:var(--text);color:#000;width:32px;height:32px;border-radius:50%;
-    display:flex;align-items:center;justify-content:center;font-size:14px;
-  }
-  .progress-row{display:flex;align-items:center;gap:8px;width:100%;max-width:480px;}
-  .progress-row span{font-size:10px;color:var(--text-dim);width:32px;}
-  .progress-track{
-    flex:1;height:4px;background:#3a3a3d;border-radius:2px;cursor:pointer;position:relative;
-  }
-  .progress-fill{height:100%;background:var(--text);border-radius:2px;width:0%;}
-  .progress-track:hover .progress-fill{background:var(--accent);}
-
-  .np-right{display:flex;align-items:center;justify-content:flex-end;gap:8px;}
-  #volumeSlider{
-    width:110px;accent-color:var(--accent);cursor:pointer;
-  }
-
-  /* OVERLAYS */
-  .overlay{
-    position:fixed;inset:0;background:rgba(0,0,0,0.75);
-    backdrop-filter:blur(3px);
-    display:flex;align-items:center;justify-content:center;
-    z-index:1000;
-  }
-  .overlay.hidden{display:none;}
-  .modal{
-    background:#161618;border:1px solid var(--border);border-radius:16px;
-    width:380px;max-width:90vw;padding:26px;
-    box-shadow:0 20px 60px rgba(0,0,0,0.6);
-  }
-  .modal.shake{animation:shake 0.4s;}
-  @keyframes shake{
-    10%,90%{transform:translateX(-2px);}
-    20%,80%{transform:translateX(4px);}
-    30%,50%,70%{transform:translateX(-8px);}
-    40%,60%{transform:translateX(8px);}
-  }
-  .modal-header{display:flex;align-items:center;gap:10px;margin-bottom:4px;}
-  .modal-header .icon{font-size:22px;}
-  .modal h3{margin:0;font-size:16px;}
-  .modal .sub{font-size:12px;color:var(--text-dim);margin:6px 0 18px;line-height:1.5;}
-  .challenge-box{
-    background:#0f0f11;border:1px solid var(--border);border-radius:10px;
-    padding:18px;margin-bottom:16px;min-height:90px;
-    display:flex;flex-direction:column;align-items:center;justify-content:center;gap:12px;
-  }
-  .modal input[type=text],.modal input[type=email],.modal input[type=number]{
-    width:100%;background:#0f0f11;border:1px solid var(--border);color:var(--text);
-    padding:10px 12px;border-radius:8px;font-size:14px;margin-bottom:10px;
-  }
-  .modal input:focus{outline:1px solid var(--accent);}
-  .modal .row{display:flex;gap:8px;}
-  .modal .row .btn,.modal .row .btn-secondary{flex:1;}
-  .choice-grid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;}
-  .choice-grid button{
-    background:#1f1f22;border:1px solid var(--border);color:var(--text);
-    font-size:22px;width:54px;height:54px;border-radius:10px;cursor:pointer;
-  }
-  .choice-grid button:hover{border-color:var(--accent);}
-  .status-line{font-size:12px;color:var(--text-dim);min-height:16px;margin-bottom:8px;}
-  .status-line.error{color:var(--danger);}
-  .status-line.ok{color:var(--accent);}
-  .runaway-zone{position:relative;width:280px;height:120px;}
-  .runaway-box{
-    position:absolute;top:35px;left:110px;
-    width:60px;height:36px;border-radius:8px;
-    background:#1f1f22;border:1px solid var(--accent);color:var(--accent);
-    font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;
-    cursor:pointer;user-select:none;transition:top .12s, left .12s;
-  }
-  .wheel-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;}
-  .wheel{
-    width:90px;height:90px;border-radius:50%;
-    background:conic-gradient(var(--accent) 0deg 216deg, var(--danger) 216deg 360deg);
-    display:flex;align-items:center;justify-content:center;
-    transition:transform 2.2s cubic-bezier(.2,.8,.2,1);
-    font-size:10px;font-weight:700;
-  }
-  .small-link{font-size:11px;color:var(--text-dim);text-decoration:underline;cursor:pointer;background:none;border:none;}
-  .small-link:disabled{opacity:0.4;cursor:not-allowed;}
-  .hint{font-size:10px;color:var(--text-dim);margin-top:6px;text-align:center;}
 </style>
 </head>
 <body>
 
 <div class="app">
-
-  <!-- SIDEBAR -->
   <aside class="sidebar">
     <div>
-      <div class="brand">🤖 NOT<span class="dot">-ify</span></div>
-      <div class="tagline">music for verified humans only</div>
+      <div class="brand">🤖 NOT<span>-ify</span></div>
+      <div class="tagline">ultra hard mode: music for verified humans only</div>
     </div>
     <nav class="nav">
-      <a class="active">Home</a>
-      <a>Search</a>
-      <a>Your Library</a>
+      <a class="active nav-link" data-view="homeView" data-secure="Open Home">Home</a>
+      <a class="nav-link" data-view="searchView" data-secure="Open Search">Search</a>
+      <a class="nav-link" data-view="libraryView" data-secure="Open Library">Your Library</a>
+      <a class="nav-link" data-view="premiumView" data-secure="Open Premium">Premium?</a>
     </nav>
     <div>
       <div class="library-title">Playlists</div>
-      <div class="lib-item">
+      <div class="lib-item" data-secure="Open Your Tracks">
         <div class="lib-icon">🎵</div>
-        <div>Your Tracks <span id="trackCountLabel" style="color:var(--text-dim)">(0)</span></div>
+        <div>Your Tracks <span id="trackCountLabel">(0)</span></div>
+      </div>
+      <div class="lib-item" data-secure="Open Suspicious Playlist">
+        <div class="lib-icon">🧪</div>
+        <div>Suspicious Mix</div>
       </div>
     </div>
   </aside>
 
-  <!-- MAIN -->
   <main class="main">
     <div class="topbar">
-      <h1 style="font-size:22px;margin:0;">Good evening</h1>
-      <div class="robot-badge">🤖 Robots blocked today: <b id="robotCounter">47,302</b></div>
+      <h1 id="pageTitle" style="font-size:23px;margin:0;">Good evening, probably human</h1>
+      <div class="status-pills">
+        <div class="pill">🤖 Blocked: <b id="robotCounter">47,302</b></div>
+        <div class="pill warn">🧠 Trust: <b id="trustScore">65</b>/100</div>
+        <div class="pill danger">🔐 Next action: <b id="nextCaptchaCount">3</b> checks</div>
+      </div>
     </div>
 
+    <section class="view active" id="homeView">
     <div class="add-panel">
-      <div class="add-col">
+      <div class="add-card">
         <h2>Upload MP3s</h2>
-        <p>Pick local files from your device.</p>
-        <label class="btn" style="margin-top:10px;display:inline-block;">
+        <p>Every upload requires several checks, because apparently music is a national security issue.</p>
+        <label class="btn" id="uploadLabel">
           + Upload MP3s
           <input id="fileInput" type="file" accept="audio/mpeg,.mp3" multiple hidden>
         </label>
       </div>
-      <div class="add-col">
+      <div class="add-card">
         <h2>Paste a YouTube link</h2>
-        <p>We hide the video, you just get the audio.</p>
+        <p>Video is hidden offscreen. Audio plays through the hidden YouTube iframe.</p>
         <div class="yt-row">
           <input id="ytInput" type="text" placeholder="https://youtube.com/watch?v=...">
           <button class="btn btn-secondary" id="addYtBtn">Add</button>
@@ -320,20 +460,86 @@
     </div>
 
     <div>
-      <div class="library-title" style="margin-bottom:10px;">Your tracks</div>
+      <div class="library-title">Your tracks</div>
       <div class="track-list" id="trackList">
-        <div class="empty-state">No tracks yet. Upload an mp3 or paste a YouTube link above.<br>(Yes, clicking those buttons will also ask if you're a robot. Sorry.)</div>
+        <div class="empty-state">
+          No tracks yet. Upload an MP3 or paste a YouTube link.<br>
+          Warning: almost every useful thing requires multiple CAPTCHAs.
+        </div>
       </div>
     </div>
+    </section>
+
+    <section class="view" id="searchView">
+      <div class="search-box">
+        <h2 style="margin:0 0 10px;font-size:18px;">Search your tracks</h2>
+        <input id="searchInput" type="text" placeholder="Search MP3s or YouTube tracks...">
+      </div>
+      <div class="library-title">Search results</div>
+      <div class="search-results" id="searchResults">
+        <div class="empty-state">Type something above to search your uploaded tracks and YouTube links.</div>
+      </div>
+    </section>
+
+    <section class="view" id="libraryView">
+      <div class="library-title">Full library</div>
+      <div class="track-list" id="libraryList">
+        <div class="empty-state">No tracks yet. Add some on the Home page.</div>
+      </div>
+    </section>
+
+    <section class="view" id="premiumView">
+      <div class="premium-owned" id="premiumOwned">✅ Fake Premium active — fewer CAPTCHAs, but the website is still annoying.</div>
+      <div class="premium-grid">
+        <div class="premium-card">
+          <h2>Free Human</h2>
+          <div class="premium-price">£0</div>
+          <ul>
+            <li>3–5 CAPTCHAs per action</li>
+            <li>Email code for volume</li>
+            <li>Random checks while listening</li>
+            <li>Trust score goes down over time</li>
+          </ul>
+          <button class="btn btn-secondary" id="freePlanBtn">Current pain</button>
+        </div>
+        <div class="premium-card featured">
+          <h2>NOT-ify Premium</h2>
+          <div class="premium-price">£4.99 fake</div>
+          <ul>
+            <li>Only 1–2 CAPTCHAs per action</li>
+            <li>Higher starting trust score</li>
+            <li>Fewer random listening checks</li>
+            <li>Premium badge</li>
+          </ul>
+          <button class="btn" id="buyPremiumBtn">Fake buy Premium</button>
+          <div class="fake-payment" id="fakePayment" style="display:none">
+            <input id="fakeCardName" type="text" placeholder="Name on fake card">
+            <input id="fakeCardNumber" type="text" placeholder="4242 4242 4242 4242">
+            <button class="btn" id="completeFakePaymentBtn">Complete fake payment</button>
+            <div class="hint">This does not take real money. It is just for the joke.</div>
+          </div>
+        </div>
+        <div class="premium-card">
+          <h2>Robot Enterprise</h2>
+          <div class="premium-price">£999 fake</div>
+          <ul>
+            <li>Still asks CAPTCHAs</li>
+            <li>Still suspicious</li>
+            <li>Still barely usable</li>
+            <li>Mostly pointless</li>
+          </ul>
+          <button class="btn btn-secondary" id="enterpriseBtn">Request fake quote</button>
+        </div>
+      </div>
+    </section>
   </main>
 
-  <!-- NOW PLAYING BAR -->
   <footer class="now-bar">
     <div class="np-left">
       <div class="art" id="artBox">💿</div>
       <div class="np-meta">
         <div class="t" id="npTitle">Nothing playing</div>
-        <div class="a" id="npArtist">Add a track to get started</div>
+        <div class="a" id="npArtist">Add a track to start suffering</div>
       </div>
     </div>
 
@@ -357,50 +563,64 @@
       <input type="range" id="volumeSlider" min="0" max="100" value="80">
     </div>
   </footer>
-
 </div>
 
-<!-- hidden YouTube player (audio only, video offscreen) -->
 <div id="ytPlayerHost" style="position:fixed;left:-9999px;top:-9999px;width:1px;height:1px;opacity:0;pointer-events:none;"></div>
 <audio id="audioEl"></audio>
 
-<!-- CAPTCHA OVERLAY -->
 <div class="overlay hidden" id="captchaOverlay">
-  <div class="modal" id="captchaModal">
-    <div class="modal-header"><span class="icon">🤖</span><h3>Quick check</h3></div>
-    <div class="sub" id="captchaSub">Please confirm you are a human and not a Roomba with WiFi.</div>
+  <div class="modal wide" id="captchaModal">
+    <div class="modal-header"><span class="icon">🤖</span><h3 id="captchaTitle">Human verification gauntlet</h3></div>
+    <p class="sub" id="captchaSub">Complete the required checks before the action is allowed.</p>
+    <div class="chain-status">
+      <span>Action: <b id="captchaActionLabel">unknown</b></span>
+      <span>Check <b id="chainCurrent">1</b>/<b id="chainTotal">3</b></span>
+      <span>Trust impact: <b id="trustImpact">-2</b></span>
+    </div>
     <div class="challenge-box" id="challengeBox"></div>
     <div class="status-line" id="captchaStatus"></div>
   </div>
 </div>
 
-<!-- VOLUME VERIFICATION OVERLAY -->
+<div class="overlay hidden" id="lockOverlay">
+  <div class="modal" id="lockModal">
+    <div class="modal-header"><span class="icon">⏳</span><h3>Human cooldown</h3></div>
+    <p class="sub">Too many failed checks. Wait before trying again.</p>
+    <div class="lock-card">
+      <div style="font-size:42px;font-weight:800" id="lockCountdown">15</div>
+      <div class="hint">seconds remaining</div>
+    </div>
+    <div class="progress-mini"><div id="lockBar"></div></div>
+  </div>
+</div>
+
 <div class="overlay hidden" id="verifyOverlay">
   <div class="modal" id="verifyModal">
-    <div class="modal-header"><span class="icon">🔊</span><h3>Volume change requires verification</h3></div>
-    <div class="sub" id="verifySub">For security purposes (no, really), tell us your email and we'll send a one-time code before this volume change can go through.</div>
+    <div class="modal-header"><span class="icon">🔊</span><h3>Volume change requires email verification</h3></div>
+    <p class="sub">No 30-second code. The code lasts 15 minutes. After the email code, you still get extra checks because this site is evil.</p>
 
     <div id="verifyStep1">
       <input type="email" id="verifyEmail" placeholder="your@email.com">
-      <div class="row">
+      <div class="row" style="display:flex;gap:8px;margin-top:10px">
         <button class="btn" id="sendCodeBtn">Send code</button>
+        <button class="btn-secondary" id="closeVerifyBtn">Cancel</button>
       </div>
       <div class="status-line" id="sendStatus"></div>
     </div>
 
-    <div id="verifyStep2" style="display:none;">
-      <p style="font-size:12px;color:var(--text-dim);margin:0 0 10px;">
-        Code sent to <b id="sentToEmail"></b>. Check the inbox (and the spam folder, lol).
+    <div id="verifyStep2" style="display:none">
+      <p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0 0 10px">
+        Code sent to <b id="sentToEmail"></b>. Check inbox or spam.
       </p>
       <input type="text" id="verifyCode" placeholder="6-digit code" maxlength="6">
-      <div class="row">
+      <div style="display:flex;gap:8px;margin-top:10px">
         <button class="btn" id="checkCodeBtn">Verify</button>
         <button class="btn-secondary" id="cancelVerifyBtn">Cancel</button>
       </div>
       <div class="status-line" id="checkStatus"></div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
-        <span class="hint" id="expiryHint" style="margin:0;"></span>
-        <button class="small-link" id="resendBtn" disabled>Resend code</button>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <span class="hint" id="expiryHint"></span>
+        <button class="btn-secondary" id="resendBtn" disabled style="padding:7px 12px;font-size:11px">Resend</button>
       </div>
     </div>
   </div>
@@ -408,465 +628,571 @@
 
 <script>
 /* =========================================================
-   EMAILJS CONFIG — paste your 3 keys from emailjs.com here
+   EMAILJS CONFIG
+   Your current public EmailJS keys from the pasted file are here.
+   Change these if you make a new EmailJS account/service/template.
    ========================================================= */
 const EMAILJS_PUBLIC_KEY  = "Tg3RK1ZF9VySifidC";
 const EMAILJS_SERVICE_ID  = "service_y762ki2";
 const EMAILJS_TEMPLATE_ID = "template_ay727ie";
 
-/* This template ("One-Time Password") expects these variables:
-   {{email}}    - recipient address
-   {{passcode}} - the 6-digit code
-   {{time}}     - human-readable expiry time, e.g. "3:42 PM" */
-/* ========================================================= */
-
 emailjs.init({ publicKey: EMAILJS_PUBLIC_KEY });
 
-/* ---------- state ---------- */
+/* ---------- app state ---------- */
 let tracks = [];
 let currentIndex = -1;
 let isPlaying = false;
-let activeEngine = null; // 'audio' | 'yt'
+let activeEngine = null;
 let actualVolume = 0.8;
 let lastSliderDisplay = 80;
 let robotsBlocked = 47302;
-
+let trustScore = Number(localStorage.getItem("not_ify_trust") || 65);
+let premiumActive = localStorage.getItem("not_ify_premium") === "yes";
+let failStreak = 0;
 let ytPlayer = null;
 let ytReady = false;
 
 /* ---------- elements ---------- */
-const fileInput = document.getElementById('fileInput');
-const ytInput = document.getElementById('ytInput');
-const addYtBtn = document.getElementById('addYtBtn');
-const trackListEl = document.getElementById('trackList');
-const trackCountLabel = document.getElementById('trackCountLabel');
+const fileInput = document.getElementById("fileInput");
+const ytInput = document.getElementById("ytInput");
+const addYtBtn = document.getElementById("addYtBtn");
+const trackListEl = document.getElementById("trackList");
+const trackCountLabel = document.getElementById("trackCountLabel");
 
-const npTitle = document.getElementById('npTitle');
-const npArtist = document.getElementById('npArtist');
-const artBox = document.getElementById('artBox');
-const playPauseBtn = document.getElementById('playPauseBtn');
-const prevBtn = document.getElementById('prevBtn');
-const nextBtn = document.getElementById('nextBtn');
-const progressTrack = document.getElementById('progressTrack');
-const progressFill = document.getElementById('progressFill');
-const curTimeEl = document.getElementById('curTime');
-const durTimeEl = document.getElementById('durTime');
+const npTitle = document.getElementById("npTitle");
+const npArtist = document.getElementById("npArtist");
+const artBox = document.getElementById("artBox");
+const playPauseBtn = document.getElementById("playPauseBtn");
+const prevBtn = document.getElementById("prevBtn");
+const nextBtn = document.getElementById("nextBtn");
+const progressTrack = document.getElementById("progressTrack");
+const progressFill = document.getElementById("progressFill");
+const curTimeEl = document.getElementById("curTime");
+const durTimeEl = document.getElementById("durTime");
 
-const volumeSlider = document.getElementById('volumeSlider');
-const volumeWrap = document.getElementById('volumeWrap');
-const audioEl = document.getElementById('audioEl');
+const volumeSlider = document.getElementById("volumeSlider");
+const volumeWrap = document.getElementById("volumeWrap");
+const audioEl = document.getElementById("audioEl");
 
-const captchaOverlay = document.getElementById('captchaOverlay');
-const challengeBox = document.getElementById('challengeBox');
-const captchaSub = document.getElementById('captchaSub');
-const captchaStatus = document.getElementById('captchaStatus');
-const captchaModal = document.getElementById('captchaModal');
-const robotCounterEl = document.getElementById('robotCounter');
+const captchaOverlay = document.getElementById("captchaOverlay");
+const challengeBox = document.getElementById("challengeBox");
+const captchaSub = document.getElementById("captchaSub");
+const captchaTitle = document.getElementById("captchaTitle");
+const captchaStatus = document.getElementById("captchaStatus");
+const captchaModal = document.getElementById("captchaModal");
+const captchaActionLabel = document.getElementById("captchaActionLabel");
+const chainCurrent = document.getElementById("chainCurrent");
+const chainTotal = document.getElementById("chainTotal");
+const trustImpact = document.getElementById("trustImpact");
+const robotCounterEl = document.getElementById("robotCounter");
+const trustScoreEl = document.getElementById("trustScore");
+const nextCaptchaCountEl = document.getElementById("nextCaptchaCount");
+const pageTitle = document.getElementById("pageTitle");
+const searchInput = document.getElementById("searchInput");
+const searchResults = document.getElementById("searchResults");
+const libraryList = document.getElementById("libraryList");
+const premiumOwned = document.getElementById("premiumOwned");
+const buyPremiumBtn = document.getElementById("buyPremiumBtn");
+const fakePayment = document.getElementById("fakePayment");
+const completeFakePaymentBtn = document.getElementById("completeFakePaymentBtn");
+const enterpriseBtn = document.getElementById("enterpriseBtn");
 
-const verifyOverlay = document.getElementById('verifyOverlay');
-const verifyStep1 = document.getElementById('verifyStep1');
-const verifyStep2 = document.getElementById('verifyStep2');
-const verifyEmail = document.getElementById('verifyEmail');
-const sendCodeBtn = document.getElementById('sendCodeBtn');
-const sendStatus = document.getElementById('sendStatus');
-const sentToEmail = document.getElementById('sentToEmail');
-const verifyCode = document.getElementById('verifyCode');
-const checkCodeBtn = document.getElementById('checkCodeBtn');
-const cancelVerifyBtn = document.getElementById('cancelVerifyBtn');
-const checkStatus = document.getElementById('checkStatus');
-const expiryHint = document.getElementById('expiryHint');
-const resendBtn = document.getElementById('resendBtn');
-const verifyModal = document.getElementById('verifyModal');
+const lockOverlay = document.getElementById("lockOverlay");
+const lockCountdown = document.getElementById("lockCountdown");
+const lockBar = document.getElementById("lockBar");
+
+const verifyOverlay = document.getElementById("verifyOverlay");
+const verifyStep1 = document.getElementById("verifyStep1");
+const verifyStep2 = document.getElementById("verifyStep2");
+const verifyEmail = document.getElementById("verifyEmail");
+const sendCodeBtn = document.getElementById("sendCodeBtn");
+const sendStatus = document.getElementById("sendStatus");
+const sentToEmail = document.getElementById("sentToEmail");
+const verifyCode = document.getElementById("verifyCode");
+const checkCodeBtn = document.getElementById("checkCodeBtn");
+const cancelVerifyBtn = document.getElementById("cancelVerifyBtn");
+const closeVerifyBtn = document.getElementById("closeVerifyBtn");
+const checkStatus = document.getElementById("checkStatus");
+const expiryHint = document.getElementById("expiryHint");
+const resendBtn = document.getElementById("resendBtn");
+const verifyModal = document.getElementById("verifyModal");
 
 /* =========================================================
-   GLOBAL "PROVE YOU'RE HUMAN" CLICK INTERCEPTOR
+   TRUST SCORE + DIFFICULTY
+   ========================================================= */
+function getCaptchaCount(){
+  if(premiumActive){
+    if(trustScore >= 60) return 1;
+    return 2;
+  }
+  if(trustScore >= 85) return 2;
+  if(trustScore >= 55) return 3;
+  if(trustScore >= 30) return 4;
+  return 5;
+}
+function updateTrustUI(){
+  trustScore = Math.max(0, Math.min(100, trustScore));
+  localStorage.setItem("not_ify_trust", String(trustScore));
+  trustScoreEl.textContent = trustScore;
+  nextCaptchaCountEl.textContent = getCaptchaCount();
+  robotCounterEl.textContent = robotsBlocked.toLocaleString();
+  if(premiumOwned) premiumOwned.classList.toggle("active", premiumActive);
+}
+updateTrustUI();
+
+/* =========================================================
+   VIEWS: HOME / SEARCH / LIBRARY / PREMIUM
+   ========================================================= */
+document.querySelectorAll(".nav-link").forEach(link => {
+  link.addEventListener("click", (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const viewId = link.dataset.view;
+    secureAction(link.dataset.secure || "Open page", () => showView(viewId), premiumActive ? 0 : 1);
+  });
+});
+
+function showView(viewId){
+  document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+  document.querySelectorAll(".nav-link").forEach(a => a.classList.remove("active"));
+  document.getElementById(viewId)?.classList.add("active");
+  document.querySelector(`.nav-link[data-view="${viewId}"]`)?.classList.add("active");
+
+  const titles = {
+    homeView:"Good evening, probably human",
+    searchView:"Search",
+    libraryView:"Your Library",
+    premiumView: premiumActive ? "Premium active" : "Upgrade to fake Premium"
+  };
+  pageTitle.textContent = titles[viewId] || "NOT-ify";
+  if(viewId === "libraryView") renderLibraryList();
+  if(viewId === "searchView") renderSearchResults();
+  if(viewId === "premiumView") updateTrustUI();
+}
+
+if(searchInput){
+  searchInput.addEventListener("input", () => {
+    secureAction("Search tracks", renderSearchResults, premiumActive ? 0 : 1);
+  });
+}
+
+function renderSearchResults(){
+  const q = (searchInput?.value || "").trim().toLowerCase();
+  if(!q){
+    searchResults.innerHTML = '<div class="empty-state">Type something above to search your uploaded tracks and YouTube links.</div>';
+    return;
+  }
+  const results = tracks
+    .map((t,i)=>({t,i}))
+    .filter(({t}) => (t.title + " " + t.artist + " " + t.type).toLowerCase().includes(q));
+  renderTrackRowsInto(searchResults, results, "No matching tracks found.");
+}
+
+function renderLibraryList(){
+  const all = tracks.map((t,i)=>({t,i}));
+  renderTrackRowsInto(libraryList, all, "No tracks yet. Add some on the Home page.");
+}
+
+function renderTrackRowsInto(container, items, emptyText){
+  if(!items.length){
+    container.innerHTML = `<div class="empty-state">${emptyText}</div>`;
+    return;
+  }
+  container.innerHTML = "";
+  items.forEach(({t,i}) => {
+    const row = makeTrackRow(t, i);
+    container.appendChild(row);
+  });
+}
+
+buyPremiumBtn?.addEventListener("click", () => {
+  fakePayment.style.display = fakePayment.style.display === "none" ? "grid" : "none";
+});
+
+completeFakePaymentBtn?.addEventListener("click", () => {
+  secureAction("Complete fake Premium payment", () => {
+    premiumActive = true;
+    localStorage.setItem("not_ify_premium", "yes");
+    trustScore = Math.max(trustScore, 90);
+    updateTrustUI();
+    pageTitle.textContent = "Premium active";
+    fakePayment.style.display = "none";
+    alert("Fake payment complete. Premium enabled. Fewer CAPTCHAs unlocked.");
+  }, 2);
+});
+
+enterpriseBtn?.addEventListener("click", () => {
+  secureAction("Request fake enterprise quote", () => {
+    alert("A fake sales robot will contact you never.");
+  }, 2);
+});
+
+
+setInterval(() => {
+  trustScore = Math.max(0, trustScore - 1);
+  updateTrustUI();
+}, 120000);
+
+/* =========================================================
+   GLOBAL CLICK INTERCEPTOR — almost every click requires checks
    ========================================================= */
 let bypassGlobalCaptcha = false;
 let captchaResolveCallback = null;
+let currentChain = null;
+let challengeCleanups = [];
+
+document.addEventListener("click", handleGlobalClick, true);
 
 function handleGlobalClick(e){
   if(bypassGlobalCaptcha) return;
   if(captchaOverlay.contains(e.target)) return;
   if(verifyOverlay.contains(e.target)) return;
-  if(e.target.closest && e.target.closest('#volumeWrap')) return; // volume has its own flow
+  if(lockOverlay.contains(e.target)) return;
+  if(e.target.closest && e.target.closest("#volumeWrap")) return;
+  if(e.target.closest && e.target.closest(".nav-link")) return;
+
+  const secureLabel = e.target.closest("[data-secure]")?.dataset.secure || e.target.textContent?.trim() || "Click";
+  const target = e.target;
 
   e.preventDefault();
   e.stopPropagation();
   if(e.stopImmediatePropagation) e.stopImmediatePropagation();
 
-  const target = e.target;
-  showCaptcha(() => {
+  showCaptchaChain(secureLabel, () => {
     bypassGlobalCaptcha = true;
-    try{ target.click(); } catch(err){}
+    try{ target.click(); }catch(err){}
     bypassGlobalCaptcha = false;
   });
 }
-document.addEventListener('click', handleGlobalClick, true);
 
-function showCaptcha(onSuccess){
+function showCaptchaChain(actionLabel, onSuccess, extra = 0){
   captchaResolveCallback = onSuccess;
-  captchaStatus.textContent = '';
-  captchaModal.classList.remove('shake');
-  renderRandomChallenge();
-  captchaOverlay.classList.remove('hidden');
+  currentChain = {
+    actionLabel,
+    total: getCaptchaCount() + extra,
+    current: 1,
+    completed: 0,
+    penalty: -2
+  };
+  captchaActionLabel.textContent = actionLabel.slice(0, 35);
+  chainTotal.textContent = currentChain.total;
+  trustImpact.textContent = currentChain.penalty;
+  captchaStatus.textContent = "";
+  captchaStatus.className = "status-line";
+  captchaModal.classList.remove("shake");
+  captchaOverlay.classList.remove("hidden");
+  renderNextChallenge();
 }
+
+function renderNextChallenge(){
+  clearChallengeCleanups();
+  if(!currentChain) return;
+
+  chainCurrent.textContent = currentChain.current;
+  captchaSub.textContent = randomItem(CAPTCHA_SUBS);
+  challengeBox.innerHTML = "";
+  captchaStatus.textContent = "";
+
+  const fn = randomItem(CHALLENGES);
+  fn(challengeBox);
+}
+
+function completeOneChallenge(){
+  if(!currentChain) return;
+
+  currentChain.completed++;
+  robotsBlocked++;
+  trustScore += 1;
+  failStreak = Math.max(0, failStreak - 1);
+  updateTrustUI();
+
+  if(currentChain.completed >= currentChain.total){
+    closeCaptcha(true);
+    return;
+  }
+
+  currentChain.current++;
+  captchaStatus.textContent = "Passed. Sadly, there is another check.";
+  captchaStatus.className = "status-line ok";
+  setTimeout(renderNextChallenge, 550);
+}
+
 function closeCaptcha(success){
-  captchaOverlay.classList.add('hidden');
+  clearChallengeCleanups();
+  captchaOverlay.classList.add("hidden");
   const cb = captchaResolveCallback;
   captchaResolveCallback = null;
-  if(success){
-    robotsBlocked++;
-    robotCounterEl.textContent = robotsBlocked.toLocaleString();
-    if(cb) cb();
-  }
+  currentChain = null;
+  if(success && cb) cb();
 }
+
 function failCaptcha(msg){
+  trustScore -= 6;
+  failStreak++;
+  updateTrustUI();
+
   captchaStatus.textContent = msg;
-  captchaStatus.className = 'status-line error';
-  captchaModal.classList.remove('shake');
+  captchaStatus.className = "status-line error";
+  captchaModal.classList.remove("shake");
   void captchaModal.offsetWidth;
-  captchaModal.classList.add('shake');
+  captchaModal.classList.add("shake");
+
+  if(failStreak >= 3){
+    failStreak = 0;
+    closeCaptcha(false);
+    startLockout(15);
+    return;
+  }
+
+  setTimeout(renderNextChallenge, 850);
 }
 
-const CAPTCHA_SUBS = [
-  "Please confirm you are a human and not a Roomba with WiFi.",
-  "We just need to make sure you're not a toaster pretending to like music.",
-  "One quick check before you can do literally anything.",
-  "Security says you have to do this. We don't make the rules. We do, actually.",
-  "Prove your humanity. This won't hurt much.",
-  "Are you a robot? Be honest. We'll know."
-];
+function startLockout(seconds){
+  lockOverlay.classList.remove("hidden");
+  let remaining = seconds;
+  lockCountdown.textContent = remaining;
+  lockBar.style.width = "100%";
 
-let challengeCleanups = [];
-function trackCleanup(fn){ challengeCleanups.push(fn); }
+  const timer = setInterval(() => {
+    remaining--;
+    lockCountdown.textContent = remaining;
+    lockBar.style.width = (remaining / seconds * 100) + "%";
+    if(remaining <= 0){
+      clearInterval(timer);
+      lockOverlay.classList.add("hidden");
+    }
+  }, 1000);
+}
+
 function clearChallengeCleanups(){
   challengeCleanups.forEach(fn => { try{ fn(); }catch(e){} });
   challengeCleanups = [];
 }
+function trackCleanup(fn){ challengeCleanups.push(fn); }
+function randomItem(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
 
-function renderRandomChallenge(){
-  clearChallengeCleanups();
-  captchaSub.textContent = CAPTCHA_SUBS[Math.floor(Math.random()*CAPTCHA_SUBS.length)];
-  challengeBox.innerHTML = '';
-  const challenges = [
-    mathChallenge, humanPickChallenge, backwardsChallenge, holdChallenge, runawayChallenge, sliderChallenge, wheelChallenge,
-    shadeChallenge, swapChallenge, mirrorMathChallenge, trafficLightChallenge, simonChallenge, memorizeNumberChallenge,
-    noClickChallenge, timingChallenge, progressZoneChallenge, dialChallenge, puzzleChallenge, riddleChallenge,
-    explainChallenge, tosChallenge
-  ];
-  const fn = challenges[Math.floor(Math.random()*challenges.length)];
-  fn(challengeBox);
-}
+const CAPTCHA_SUBS = [
+  "Please prove you are not a Bluetooth toaster.",
+  "This website has trust issues.",
+  "You clicked something. That was suspicious.",
+  "Security department says no fun until verification.",
+  "Complete the checks to unlock this tiny amount of music.",
+  "Humanity check required. Again.",
+  "Your action was flagged as potentially enjoyable.",
+  "Robots hate this one weird trick."
+];
 
-function succeed(){ closeCaptcha(true); }
+/* =========================================================
+   CHALLENGES
+   ========================================================= */
+const CHALLENGES = [
+  mathChallenge, humanPickChallenge, backwardsChallenge, holdChallenge, runawayChallenge,
+  sliderChallenge, wheelChallenge, shadeChallenge, swapChallenge, mirrorMathChallenge,
+  trafficLightChallenge, simonChallenge, memorizeNumberChallenge, noClickChallenge,
+  timingChallenge, progressZoneChallenge, dialChallenge, puzzleChallenge, riddleChallenge,
+  explainChallenge, tosChallenge, tinyTargetChallenge, typingChallenge, fakeAdChallenge,
+  colorWordChallenge, captchaWithinCaptchaChallenge
+];
 
-/* --- challenge: math with emoji --- */
 function mathChallenge(box){
-  const a = 1 + Math.floor(Math.random()*5);
-  const b = 1 + Math.floor(Math.random()*5);
-  const answer = a + b;
-  const label = document.createElement('div');
-  label.style.fontSize = '15px';
-  label.textContent = `${'🍕'.repeat(a)} + ${'🍕'.repeat(b)} = ?`;
-  box.appendChild(label);
+  const a = 3 + Math.floor(Math.random()*11);
+  const b = 2 + Math.floor(Math.random()*9);
+  const c = Math.floor(Math.random()*5);
+  const answer = a + b - c;
+  addLabel(box, `Solve: ${a} + ${b} - ${c}`);
   const opts = new Set([answer]);
-  while(opts.size < 4) opts.add(Math.max(0, answer + Math.floor(Math.random()*7) - 3));
-  const grid = document.createElement('div');
-  grid.className = 'choice-grid';
-  [...opts].sort(()=>Math.random()-0.5).forEach(n=>{
-    const b2 = document.createElement('button');
-    b2.style.fontSize='16px';
-    b2.textContent = n;
-    b2.onclick = () => n === answer ? succeed() : failCaptcha("Wrong. A real human can count pizza.");
-    grid.appendChild(b2);
-  });
-  box.appendChild(grid);
+  while(opts.size < 5) opts.add(answer + Math.floor(Math.random()*11)-5);
+  addChoiceButtons(box, [...opts], n => n === answer, "Wrong. Maths defeated you.");
 }
 
-/* --- challenge: pick the human emoji --- */
 function humanPickChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px';
-  label.style.color='var(--text-dim)';
-  label.textContent = 'Click the human.';
-  box.appendChild(label);
-  const pool = ['🤖','🛸','🦾','🤖','🧑','🤖'].sort(()=>Math.random()-0.5);
-  const grid = document.createElement('div');
-  grid.className = 'choice-grid';
-  pool.forEach(ch=>{
-    const b = document.createElement('button');
-    b.textContent = ch;
-    b.onclick = () => ch === '🧑' ? succeed() : failCaptcha("Nice try, bot.");
-    grid.appendChild(b);
-  });
-  box.appendChild(grid);
+  addLabel(box, "Click the human, not the bots.");
+  const pool = ["🤖","🛸","🦾","🧑","🧟","👽","🤖","🧍"].sort(()=>Math.random()-.5);
+  addChoiceButtons(box, pool, ch => ch === "🧑" || ch === "🧍", "That was not convincingly human.");
 }
 
-/* --- challenge: type ROBOT backwards --- */
 function backwardsChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px';
-  label.style.color='var(--text-dim)';
-  label.textContent = 'Type "ROBOT" backwards:';
-  box.appendChild(label);
-  const input = document.createElement('input');
-  input.type='text';
-  input.maxLength=5;
-  input.style.textAlign='center';
-  input.style.textTransform='uppercase';
-  input.style.width='120px';
-  box.appendChild(input);
-  const btn = document.createElement('button');
-  btn.className='btn';
-  btn.textContent='Submit';
-  btn.style.marginTop='8px';
-  btn.onclick = () => input.value.trim().toUpperCase() === 'TOBOR' ? succeed() : failCaptcha("Nope. That's not backwards ROBOT.");
-  box.appendChild(btn);
+  const words = ["ROBOT","MUSIC","VERIFY","HUMAN","SPOTIFY"];
+  const word = randomItem(words);
+  const answer = word.split("").reverse().join("");
+  addLabel(box, `Type "${word}" backwards:`);
+  const input = addInput(box, "text", "Backwards...");
+  const btn = addButton(box, "Submit");
+  btn.onclick = () => input.value.trim().toUpperCase() === answer ? completeOneChallenge() : failCaptcha("Nope. Backwards is hard apparently.");
 }
 
-/* --- challenge: hold for ~2 seconds --- */
 function holdChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px';
-  label.style.color='var(--text-dim)';
-  label.textContent = 'Press and hold for exactly 2 seconds.';
-  box.appendChild(label);
-  const btn = document.createElement('button');
-  btn.className='btn';
-  btn.textContent='HOLD ME';
+  const target = 1800 + Math.floor(Math.random()*700);
+  addLabel(box, `Hold the button for about ${(target/1000).toFixed(1)} seconds.`);
+  const btn = addButton(box, "HOLD ME");
   let start = 0;
   const begin = () => { start = Date.now(); };
   const end = () => {
-    const elapsed = (Date.now() - start) / 1000;
-    if(elapsed < 1.6) failCaptcha("Too quick. A robot would do exactly that.");
-    else if(elapsed > 2.6) failCaptcha("Too slow. Did you fall asleep?");
-    else succeed();
+    const elapsed = Math.abs(Date.now() - start - target);
+    elapsed <= 650 ? completeOneChallenge() : failCaptcha("Bad timing. Too human, or not human enough.");
   };
-  btn.addEventListener('mousedown', begin);
-  btn.addEventListener('mouseup', end);
-  btn.addEventListener('touchstart', begin);
-  btn.addEventListener('touchend', end);
-  box.appendChild(btn);
+  btn.addEventListener("mousedown", begin);
+  btn.addEventListener("mouseup", end);
+  btn.addEventListener("touchstart", begin);
+  btn.addEventListener("touchend", end);
 }
 
-/* --- challenge: runaway checkbox --- */
 function runawayChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px';
-  label.style.color='var(--text-dim)';
-  label.textContent = 'Click the box.';
-  box.appendChild(label);
-  const zone = document.createElement('div');
-  zone.className = 'runaway-zone';
-  const target = document.createElement('div');
-  target.className = 'runaway-box';
-  target.textContent = 'click me';
+  addLabel(box, "Click the runaway box.");
+  const zone = document.createElement("div");
+  zone.className = "runaway-zone";
+  const target = document.createElement("div");
+  target.className = "runaway-box";
+  target.textContent = "click";
   target.tabIndex = 0;
-  const move = () => {
-    if(Math.random() < 0.7){
-      const maxLeft = 280 - 60, maxTop = 120 - 36;
-      target.style.left = Math.floor(Math.random()*maxLeft) + 'px';
-      target.style.top = Math.floor(Math.random()*maxTop) + 'px';
-    }
-  };
-  target.addEventListener('mouseenter', move);
-  target.addEventListener('click', succeed);
-  target.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') succeed(); });
+  target.addEventListener("mouseenter", () => {
+    const maxLeft = 230, maxTop = 87;
+    target.style.left = Math.floor(Math.random()*maxLeft) + "px";
+    target.style.top = Math.floor(Math.random()*maxTop) + "px";
+  });
+  target.addEventListener("click", completeOneChallenge);
+  target.addEventListener("keydown", e => {
+    if(e.key === "Enter" || e.key === " ") completeOneChallenge();
+  });
   zone.appendChild(target);
   box.appendChild(zone);
-  const hint = document.createElement('div');
-  hint.className = 'hint';
-  hint.textContent = 'Stuck? Tab to it and press space/enter.';
-  box.appendChild(hint);
+  addHint(box, "Hint: Tab + Enter can help.");
 }
 
-/* --- challenge: drag slider to a target zone --- */
 function sliderChallenge(box){
-  const targetMin = 68, targetMax = 76;
-  const label = document.createElement('div');
-  label.style.fontSize='13px';
-  label.style.color='var(--text-dim)';
-  label.textContent = 'Drag the slider to roughly 73%.';
-  box.appendChild(label);
-  const input = document.createElement('input');
-  input.type='range'; input.min=0; input.max=100; input.value=Math.floor(Math.random()*40);
-  input.style.width='220px';
-  input.style.accentColor='var(--accent)';
+  const target = 15 + Math.floor(Math.random()*75);
+  addLabel(box, `Set the slider to ${target} exactly.`);
+  const input = document.createElement("input");
+  input.type = "range";
+  input.min = 0;
+  input.max = 100;
+  input.value = Math.floor(Math.random()*100);
+  input.style.width = "260px";
+  input.style.accentColor = "var(--accent)";
   box.appendChild(input);
-  const btn = document.createElement('button');
-  btn.className='btn';
-  btn.textContent='Check';
-  btn.style.marginTop='8px';
-  btn.onclick = () => {
-    const v = parseInt(input.value,10);
-    if(v >= targetMin && v <= targetMax) succeed();
-    else { failCaptcha(v < targetMin ? "Closer... but a robot wouldn't even try." : "Overshot. Try again."); }
-  };
-  box.appendChild(btn);
+  const value = document.createElement("div");
+  value.className = "hint";
+  value.textContent = "Current: " + input.value;
+  box.appendChild(value);
+  input.oninput = () => value.textContent = "Current: " + input.value;
+  const btn = addButton(box, "Check");
+  btn.onclick = () => Number(input.value) === target ? completeOneChallenge() : failCaptcha("Not exact. This website is petty.");
 }
 
-/* --- challenge: spin the wheel --- */
 function wheelChallenge(box){
-  const wrap = document.createElement('div');
-  wrap.className = 'wheel-wrap';
-  const wheel = document.createElement('div');
-  wheel.className = 'wheel';
-  wheel.textContent = '?';
-  wrap.appendChild(wheel);
-  const btn = document.createElement('button');
-  btn.className = 'btn';
-  btn.textContent = 'Spin to verify';
-  wrap.appendChild(btn);
-  box.appendChild(wrap);
+  addLabel(box, "Spin. Land on human.");
+  const wheel = document.createElement("div");
+  wheel.style.cssText = "width:105px;height:105px;border-radius:50%;background:conic-gradient(var(--accent) 0deg 145deg,var(--danger) 145deg 360deg);display:grid;place-items:center;font-weight:900;transition:transform 2.2s cubic-bezier(.2,.8,.2,1)";
+  wheel.textContent = "?";
+  box.appendChild(wheel);
+  const btn = addButton(box, "Spin");
   btn.onclick = () => {
     btn.disabled = true;
-    const extraSpins = 4 + Math.floor(Math.random()*3);
     const finalAngle = Math.random()*360;
-    wheel.style.transform = `rotate(${extraSpins*360 + finalAngle}deg)`;
+    wheel.style.transform = `rotate(${1440 + finalAngle}deg)`;
     setTimeout(() => {
-      const landed = finalAngle % 360;
-      const isHuman = landed < 216; // matches the 216deg green segment
-      if(isHuman){
-        wheel.textContent = '🧑';
-        setTimeout(succeed, 500);
-      } else {
-        wheel.textContent = '🤖';
-        failCaptcha("Landed on robot. Spin again.");
-        btn.disabled = false;
-      }
+      if(finalAngle < 145){ wheel.textContent = "🧑"; completeOneChallenge(); }
+      else { wheel.textContent = "🤖"; btn.disabled = false; failCaptcha("Wheel says robot."); }
     }, 2200);
   };
 }
 
-/* --- challenge: spot the off-shade square --- */
 function shadeChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Click the square that\'s a different shade.';
-  box.appendChild(label);
-  const grid = document.createElement('div'); grid.className='choice-grid';
-  const total = 9;
-  const correctIndex = Math.floor(Math.random()*total);
-  for(let i=0;i<total;i++){
-    const sq = document.createElement('button');
-    sq.style.width='36px'; sq.style.height='36px'; sq.style.borderRadius='6px'; sq.style.border='1px solid var(--border)';
-    sq.style.background = `hsl(140, 65%, ${i===correctIndex ? 53 : 43}%)`;
-    sq.onclick = () => i===correctIndex ? succeed() : failCaptcha("Nope, identical. Look closer.");
+  addLabel(box, "Click the slightly different square.");
+  const grid = document.createElement("div");
+  grid.className = "choice-grid";
+  const correct = Math.floor(Math.random()*12);
+  for(let i=0;i<12;i++){
+    const sq = document.createElement("button");
+    sq.style.width = "38px";
+    sq.style.height = "38px";
+    sq.style.borderRadius = "7px";
+    sq.style.background = `hsl(140,65%,${i===correct?52:45}%)`;
+    sq.onclick = () => i === correct ? completeOneChallenge() : failCaptcha("Wrong shade.");
     grid.appendChild(sq);
   }
   box.appendChild(grid);
 }
 
-/* --- challenge: click the circle, not the square (they swap) --- */
 function swapChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Click the circle, not the square. They move.';
-  box.appendChild(label);
-  const zone = document.createElement('div');
-  zone.style.cssText = 'position:relative;width:240px;height:84px;';
-  const circle = document.createElement('button');
-  circle.style.cssText = 'position:absolute;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;transition:left .25s, top .25s;';
-  const square = document.createElement('button');
-  square.style.cssText = 'position:absolute;width:44px;height:44px;border-radius:6px;background:#55555a;border:none;cursor:pointer;transition:left .25s, top .25s;';
-  const slots = [{left:20,top:18},{left:170,top:18},{left:95,top:40}];
+  addLabel(box, "Click the circle, not the square. They move.");
+  const zone = document.createElement("div");
+  zone.style.cssText = "position:relative;width:260px;height:90px";
+  const circle = document.createElement("button");
+  const square = document.createElement("button");
+  circle.style.cssText = "position:absolute;width:45px;height:45px;border-radius:50%;background:var(--accent);border:none;transition:left .2s,top .2s;cursor:pointer";
+  square.style.cssText = "position:absolute;width:45px;height:45px;border-radius:7px;background:#666;border:none;transition:left .2s,top .2s;cursor:pointer";
+  const slots = [{left:20,top:22},{left:105,top:10},{left:190,top:30},{left:90,top:42}];
   function place(){
-    const shuffled = slots.slice().sort(()=>Math.random()-0.5);
-    circle.style.left = shuffled[0].left+'px'; circle.style.top = shuffled[0].top+'px';
-    square.style.left = shuffled[1].left+'px'; square.style.top = shuffled[1].top+'px';
+    const s = slots.slice().sort(()=>Math.random()-.5);
+    circle.style.left = s[0].left+"px"; circle.style.top = s[0].top+"px";
+    square.style.left = s[1].left+"px"; square.style.top = s[1].top+"px";
   }
   place();
-  const interval = setInterval(place, 600);
+  const interval = setInterval(place, 450);
   trackCleanup(() => clearInterval(interval));
-  circle.onclick = succeed;
-  square.onclick = () => failCaptcha("That was the square.");
-  zone.appendChild(circle); zone.appendChild(square);
+  circle.onclick = completeOneChallenge;
+  square.onclick = () => failCaptcha("Square. Not circle.");
+  zone.append(circle,square);
   box.appendChild(zone);
 }
 
-/* --- challenge: mirrored/upside-down math --- */
 function mirrorMathChallenge(box){
-  const a = 1 + Math.floor(Math.random()*6);
-  const b = 1 + Math.floor(Math.random()*6);
-  const answer = a + b;
-  const flipStyle = Math.random() < 0.5 ? 'scaleX(-1)' : 'rotate(180deg)';
-  const label = document.createElement('div');
-  label.style.fontSize = '13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Solve this (yes, it\'s upside down):';
-  box.appendChild(label);
-  const problem = document.createElement('div');
-  problem.style.fontSize = '20px';
-  problem.style.transform = flipStyle;
-  problem.textContent = `${a} + ${b} = ?`;
+  const a = 2 + Math.floor(Math.random()*9);
+  const b = 2 + Math.floor(Math.random()*9);
+  const answer = a * b;
+  addLabel(box, "Solve the flipped problem:");
+  const problem = document.createElement("div");
+  problem.textContent = `${a} × ${b} = ?`;
+  problem.style.cssText = "font-size:22px;font-weight:900;transform:scaleX(-1)";
   box.appendChild(problem);
   const opts = new Set([answer]);
-  while(opts.size < 4) opts.add(Math.max(0, answer + Math.floor(Math.random()*7) - 3));
-  const grid = document.createElement('div'); grid.className = 'choice-grid';
-  [...opts].sort(()=>Math.random()-0.5).forEach(n=>{
-    const b2 = document.createElement('button');
-    b2.style.fontSize='16px'; b2.textContent = n;
-    b2.onclick = () => n === answer ? succeed() : failCaptcha("Wrong. Try reading it more carefully.");
-    grid.appendChild(b2);
-  });
-  box.appendChild(grid);
+  while(opts.size < 5) opts.add(Math.max(0, answer + Math.floor(Math.random()*15)-7));
+  addChoiceButtons(box, [...opts], n => n === answer, "Wrong flipped maths.");
 }
 
-/* --- challenge: find the odd traffic light --- */
 function trafficLightChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Click the odd one out.';
-  box.appendChild(label);
-  const total = 9;
-  const oddIndex = Math.floor(Math.random()*total);
-  const grid = document.createElement('div'); grid.className = 'choice-grid';
-  for(let i=0;i<total;i++){
-    const b = document.createElement('button');
-    b.style.fontSize='20px';
-    b.textContent = i === oddIndex ? '🚥' : '🚦';
-    b.onclick = () => i === oddIndex ? succeed() : failCaptcha("Look again.");
-    grid.appendChild(b);
-  }
-  box.appendChild(grid);
+  addLabel(box, "Click the odd one out.");
+  const odd = Math.floor(Math.random()*12);
+  const vals = Array.from({length:12}, (_,i)=>i===odd?"🚥":"🚦");
+  addChoiceButtons(box, vals, (_,i) => i === odd, "Look closer.");
 }
 
-/* --- challenge: Simon-says emoji sequence --- */
 function simonChallenge(box){
-  const palette = ['🔴','🟢','🔵','🟡'];
-  const seqLen = 3 + Math.floor(Math.random()*2);
-  const seq = Array.from({length:seqLen}, () => palette[Math.floor(Math.random()*palette.length)]);
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Watch closely...';
-  box.appendChild(label);
-  const display = document.createElement('div');
-  display.style.cssText = 'font-size:40px;height:50px;display:flex;align-items:center;justify-content:center;';
+  const palette = ["🔴","🟢","🔵","🟡","🟣"];
+  const length = trustScore < 35 ? 7 : 5;
+  const seq = Array.from({length}, () => randomItem(palette));
+  addLabel(box, "Watch the sequence.");
+  const display = document.createElement("div");
+  display.style.cssText = "font-size:42px;height:50px;display:grid;place-items:center";
   box.appendChild(display);
   let i = 0;
-  function showNext(){
+  const show = setInterval(() => {
     if(i >= seq.length){
-      display.textContent = '';
-      label.textContent = 'Now click them in the same order.';
-      renderInputGrid();
+      clearInterval(show);
+      display.textContent = "";
+      box.querySelector(".captcha-label").textContent = "Now repeat it.";
+      renderSimonInput();
       return;
     }
-    display.textContent = seq[i];
-    i++;
-    const tNext = setTimeout(showNext, 700);
-    trackCleanup(() => clearTimeout(tNext));
-  }
-  const t0 = setTimeout(showNext, 500);
-  trackCleanup(() => clearTimeout(t0));
-  function renderInputGrid(){
-    const grid = document.createElement('div'); grid.className = 'choice-grid';
-    const userSeq = [];
+    display.textContent = seq[i++];
+  }, 600);
+  trackCleanup(() => clearInterval(show));
+  function renderSimonInput(){
+    const user = [];
+    const grid = document.createElement("div");
+    grid.className = "choice-grid";
     palette.forEach(p => {
-      const b = document.createElement('button'); b.textContent = p;
+      const b = document.createElement("button");
+      b.textContent = p;
       b.onclick = () => {
-        userSeq.push(p);
-        const idx = userSeq.length - 1;
-        if(userSeq[idx] !== seq[idx]){ failCaptcha("Wrong order. Pay attention next time."); userSeq.length = 0; return; }
-        if(userSeq.length === seq.length) succeed();
+        user.push(p);
+        const idx = user.length - 1;
+        if(user[idx] !== seq[idx]){
+          failCaptcha("Wrong sequence.");
+          return;
+        }
+        if(user.length === seq.length) completeOneChallenge();
       };
       grid.appendChild(b);
     });
@@ -874,323 +1200,366 @@ function simonChallenge(box){
   }
 }
 
-/* --- challenge: memorize a 4-digit number --- */
 function memorizeNumberChallenge(box){
-  const num = String(Math.floor(1000 + Math.random()*9000));
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Memorize this number:';
-  box.appendChild(label);
-  const display = document.createElement('div');
-  display.style.cssText = 'font-size:28px;font-weight:700;';
+  const len = trustScore < 35 ? 6 : 5;
+  const num = Array.from({length:len},()=>Math.floor(Math.random()*10)).join("");
+  addLabel(box, "Memorize this:");
+  const display = document.createElement("div");
+  display.style.cssText = "font-size:30px;font-weight:900;letter-spacing:.18em";
   display.textContent = num;
   box.appendChild(display);
-  const t = setTimeout(() => {
-    display.textContent = '????';
-    const input = document.createElement('input');
-    input.type = 'text'; input.maxLength = 4;
-    input.style.width = '100px'; input.style.textAlign = 'center';
-    box.appendChild(input);
-    const btn = document.createElement('button');
-    btn.className = 'btn'; btn.textContent = 'Submit'; btn.style.marginTop = '8px';
-    btn.onclick = () => input.value.trim() === num ? succeed() : failCaptcha("Nope. A human would remember that.");
-    box.appendChild(btn);
-  }, 1200);
-  trackCleanup(() => clearTimeout(t));
+  const timer = setTimeout(() => {
+    display.textContent = "?????";
+    const input = addInput(box, "text", "Type the number");
+    input.maxLength = len;
+    const btn = addButton(box, "Submit");
+    btn.onclick = () => input.value.trim() === num ? completeOneChallenge() : failCaptcha("Memory failed.");
+  }, 1100);
+  trackCleanup(() => clearTimeout(timer));
 }
 
-/* --- challenge: do NOT click for 5 seconds --- */
 function noClickChallenge(box){
-  function start(){
-    box.innerHTML = '';
-    const label = document.createElement('div');
-    label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-    label.textContent = 'Do NOT click anything for 5 seconds. Just wait.';
-    box.appendChild(label);
-    const ring = document.createElement('div');
-    ring.style.cssText = 'font-size:30px;font-weight:700;';
-    ring.textContent = '5';
-    box.appendChild(ring);
-    let remaining = 5, failed = false;
-    const clickHandler = () => {
-      if(failed) return;
-      failed = true;
-      clearInterval(interval);
-      box.removeEventListener('click', clickHandler);
-      failCaptcha("You clicked! Patience, human.");
-      const retryBtn = document.createElement('button');
-      retryBtn.className = 'btn-secondary'; retryBtn.textContent = 'Try again'; retryBtn.style.marginTop = '10px';
-      retryBtn.onclick = (ev) => { ev.stopPropagation(); start(); };
-      box.appendChild(retryBtn);
-    };
-    box.addEventListener('click', clickHandler);
-    const interval = setInterval(() => {
-      remaining--;
-      ring.textContent = remaining;
-      if(remaining <= 0){
-        clearInterval(interval);
-        box.removeEventListener('click', clickHandler);
-        if(!failed) succeed();
-      }
-    }, 1000);
-    trackCleanup(() => { clearInterval(interval); box.removeEventListener('click', clickHandler); });
-  }
-  start();
+  let remaining = 4;
+  addLabel(box, "Do NOT click anything for 4 seconds.");
+  const count = document.createElement("div");
+  count.style.cssText = "font-size:42px;font-weight:900";
+  count.textContent = remaining;
+  box.appendChild(count);
+  let failed = false;
+  const clickHandler = () => {
+    if(failed) return;
+    failed = true;
+    clearInterval(timer);
+    box.removeEventListener("click", clickHandler);
+    failCaptcha("You clicked. That was the one thing not to do.");
+  };
+  box.addEventListener("click", clickHandler);
+  const timer = setInterval(() => {
+    remaining--;
+    count.textContent = remaining;
+    if(remaining <= 0){
+      clearInterval(timer);
+      box.removeEventListener("click", clickHandler);
+      if(!failed) completeOneChallenge();
+    }
+  }, 1000);
+  trackCleanup(() => { clearInterval(timer); box.removeEventListener("click", clickHandler); });
 }
 
-/* --- challenge: click GO the instant it appears --- */
 function timingChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Click the button the instant it says GO. Too early or too late fails.';
-  box.appendChild(label);
-  const btn = document.createElement('button');
-  btn.className = 'btn'; btn.textContent = 'WAIT...'; btn.disabled = true; btn.style.marginTop = '10px';
-  box.appendChild(btn);
-  const delay = 1500 + Math.random()*2500;
-  let goShown = false, resultGiven = false;
+  addLabel(box, "Click when it says GO. Not before.");
+  const btn = addButton(box, "WAIT...");
+  btn.disabled = true;
+  let go = false;
+  let done = false;
+  const delay = 1200 + Math.random()*2600;
   const t = setTimeout(() => {
-    btn.disabled = false; btn.textContent = 'CLICK NOW';
-    goShown = true;
-    const t2 = setTimeout(() => {
-      if(goShown && !resultGiven){ resultGiven = true; btn.disabled = true; failCaptcha("Too slow."); }
-    }, 800);
-    trackCleanup(() => clearTimeout(t2));
+    go = true;
+    btn.disabled = false;
+    btn.textContent = "GO";
+    const tooLate = setTimeout(() => {
+      if(!done){ done = true; failCaptcha("Too slow."); }
+    }, 650);
+    trackCleanup(() => clearTimeout(tooLate));
   }, delay);
   trackCleanup(() => clearTimeout(t));
   btn.onclick = () => {
-    if(resultGiven) return;
-    resultGiven = true;
-    if(!goShown) failCaptcha("Too early! That's exactly what a robot would do.");
-    else succeed();
+    if(done) return;
+    done = true;
+    go ? completeOneChallenge() : failCaptcha("Too early.");
   };
 }
 
-/* --- challenge: stop the bar in the green zone --- */
 function progressZoneChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Click STOP when the bar is in the green zone.';
-  box.appendChild(label);
-  const track = document.createElement('div');
-  track.style.cssText = 'width:240px;height:14px;background:#222;border-radius:7px;position:relative;overflow:hidden;margin:10px 0;';
-  const zoneStart = 55 + Math.random()*10;
-  const zoneWidth = 12;
-  const zone = document.createElement('div');
-  zone.style.cssText = `position:absolute;left:${zoneStart}%;width:${zoneWidth}%;height:100%;background:rgba(30,215,96,0.35);`;
-  const fill = document.createElement('div');
-  fill.style.cssText = 'height:100%;background:var(--accent);width:0%;';
-  track.appendChild(zone); track.appendChild(fill);
+  addLabel(box, "Stop the bar in the green zone.");
+  const track = document.createElement("div");
+  track.style.cssText = "position:relative;width:280px;height:16px;background:#222;border-radius:999px;overflow:hidden";
+  const zoneStart = 50 + Math.random()*25;
+  const zoneWidth = 8;
+  const zone = document.createElement("div");
+  zone.style.cssText = `position:absolute;left:${zoneStart}%;width:${zoneWidth}%;height:100%;background:rgba(30,215,96,.4)`;
+  const fill = document.createElement("div");
+  fill.style.cssText = "height:100%;width:0%;background:var(--accent)";
+  track.append(zone,fill);
   box.appendChild(track);
-  const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'STOP';
-  box.appendChild(btn);
+  const btn = addButton(box, "STOP");
   let pct = 0, dir = 1, raf;
   function tick(){
-    pct += dir*1.4;
-    if(pct >= 100){ pct = 100; dir = -1; }
-    if(pct <= 0){ pct = 0; dir = 1; }
-    fill.style.width = pct + '%';
+    pct += dir * 1.8;
+    if(pct >= 100){pct=100;dir=-1}
+    if(pct <= 0){pct=0;dir=1}
+    fill.style.width = pct + "%";
     raf = requestAnimationFrame(tick);
   }
   raf = requestAnimationFrame(tick);
   trackCleanup(() => cancelAnimationFrame(raf));
   btn.onclick = () => {
     cancelAnimationFrame(raf);
-    if(pct >= zoneStart && pct <= zoneStart + zoneWidth) succeed();
-    else {
-      failCaptcha("Missed the zone.");
-      pct = 0; raf = requestAnimationFrame(tick);
-      trackCleanup(() => cancelAnimationFrame(raf));
-    }
+    pct >= zoneStart && pct <= zoneStart + zoneWidth ? completeOneChallenge() : failCaptcha("Missed the zone.");
   };
 }
 
-/* --- challenge: turn the dial to the human zone --- */
 function dialChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Drag the dial up/down until it says HUMAN, then release.';
-  box.appendChild(label);
-  const target = 60 + Math.floor(Math.random()*20);
-  const zoneLo = target, zoneHi = target + 10;
+  addLabel(box, "Drag the dial until it says HUMAN, then release.");
+  const target = 55 + Math.floor(Math.random()*25);
+  const lo = target, hi = target + 8;
   let value = Math.floor(Math.random()*40);
-  const dial = document.createElement('div');
-  dial.style.cssText = 'width:70px;height:70px;border-radius:50%;background:#1f1f22;border:3px solid var(--border);position:relative;cursor:grab;user-select:none;margin:6px 0;';
-  const needle = document.createElement('div');
-  needle.style.cssText = 'width:3px;height:28px;background:var(--accent);position:absolute;top:6px;left:50%;transform-origin:bottom center;';
+  const dial = document.createElement("div");
+  dial.style.cssText = "width:80px;height:80px;border-radius:50%;background:#222;border:3px solid var(--border);position:relative;cursor:grab";
+  const needle = document.createElement("div");
+  needle.style.cssText = "width:4px;height:31px;background:var(--accent);position:absolute;top:7px;left:50%;transform-origin:bottom center";
   dial.appendChild(needle);
   box.appendChild(dial);
-  const valueLabel = document.createElement('div');
-  valueLabel.style.cssText = 'font-size:11px;color:var(--text-dim);';
-  box.appendChild(valueLabel);
+  const text = document.createElement("div");
+  text.className = "hint";
+  box.appendChild(text);
   function render(){
     const angle = (value/100)*270 - 135;
     needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
-    valueLabel.textContent = (value >= zoneLo && value <= zoneHi) ? 'HUMAN ✅' : 'keep turning...';
+    text.textContent = value >= lo && value <= hi ? "HUMAN ✅" : "Suspicious...";
   }
   render();
-  let dragging = false, startY = 0, startVal = 0;
-  function onDown(e){ dragging = true; startY = e.clientY; startVal = value; dial.style.cursor = 'grabbing'; }
-  function onMove(e){
+  let dragging=false,startY=0,startVal=0;
+  dial.onmousedown = e => {dragging=true;startY=e.clientY;startVal=value;};
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+  trackCleanup(() => { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); });
+  function move(e){
     if(!dragging) return;
-    const delta = startY - e.clientY;
-    value = Math.max(0, Math.min(100, startVal + delta));
+    value = Math.max(0, Math.min(100, startVal + (startY - e.clientY)));
     render();
   }
-  function onUp(){
+  function up(){
     if(!dragging) return;
-    dragging = false; dial.style.cursor = 'grab';
-    if(value >= zoneLo && value <= zoneHi) succeed();
-    else failCaptcha("Not quite. Keep turning.");
+    dragging=false;
+    value >= lo && value <= hi ? completeOneChallenge() : failCaptcha("Dial not human enough.");
   }
-  dial.addEventListener('mousedown', onDown);
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseup', onUp);
-  trackCleanup(() => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); });
 }
 
-/* --- challenge: drag the puzzle piece into the gap --- */
 function puzzleChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = 'Drag the piece into the gap.';
-  box.appendChild(label);
-  const track = document.createElement('div');
-  track.style.cssText = 'position:relative;width:240px;height:50px;background:#0f0f11;border:1px solid var(--border);border-radius:8px;';
-  const notchPos = 140 + Math.random()*60;
-  const notch = document.createElement('div');
-  notch.style.cssText = `position:absolute;left:${notchPos}px;top:5px;width:40px;height:40px;border:2px dashed var(--accent);border-radius:6px;`;
-  const piece = document.createElement('div');
-  piece.style.cssText = 'position:absolute;left:0px;top:5px;width:40px;height:40px;background:var(--accent);border-radius:6px;cursor:grab;';
-  track.appendChild(notch); track.appendChild(piece);
+  addLabel(box, "Drag the piece into the gap.");
+  const track = document.createElement("div");
+  track.style.cssText = "position:relative;width:280px;height:56px;background:#0b0b0e;border:1px solid var(--border);border-radius:10px";
+  const notchPos = 150 + Math.random()*70;
+  const notch = document.createElement("div");
+  notch.style.cssText = `position:absolute;left:${notchPos}px;top:7px;width:42px;height:42px;border:2px dashed var(--accent);border-radius:8px`;
+  const piece = document.createElement("div");
+  piece.style.cssText = "position:absolute;left:0;top:7px;width:42px;height:42px;background:var(--accent);border-radius:8px;cursor:grab";
+  track.append(notch,piece);
   box.appendChild(track);
-  let dragging = false, startX = 0, startLeft = 0;
-  function onDown(e){ dragging = true; startX = e.clientX; startLeft = parseFloat(piece.style.left); piece.style.cursor = 'grabbing'; }
-  function onMove(e){
+  let dragging=false,startX=0,startLeft=0;
+  piece.onmousedown = e => {dragging=true;startX=e.clientX;startLeft=parseFloat(piece.style.left);};
+  window.addEventListener("mousemove", move);
+  window.addEventListener("mouseup", up);
+  trackCleanup(() => { window.removeEventListener("mousemove", move); window.removeEventListener("mouseup", up); });
+  function move(e){
     if(!dragging) return;
-    let newLeft = startLeft + (e.clientX - startX);
-    newLeft = Math.max(0, Math.min(200, newLeft));
-    piece.style.left = newLeft + 'px';
+    piece.style.left = Math.max(0, Math.min(238, startLeft + e.clientX - startX)) + "px";
   }
-  function onUp(){
+  function up(){
     if(!dragging) return;
-    dragging = false; piece.style.cursor = 'grab';
-    const pieceLeft = parseFloat(piece.style.left);
-    if(Math.abs(pieceLeft - notchPos) < 14) succeed();
-    else failCaptcha("Missed the gap.");
+    dragging=false;
+    Math.abs(parseFloat(piece.style.left) - notchPos) < 12 ? completeOneChallenge() : failCaptcha("Missed the gap.");
   }
-  piece.addEventListener('mousedown', onDown);
-  window.addEventListener('mousemove', onMove);
-  window.addEventListener('mouseup', onUp);
-  trackCleanup(() => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); });
 }
 
-/* --- challenge: riddle multiple choice --- */
 const RIDDLES = [
-  { q: "What gets wetter the more it dries?", choices: ["A towel","A sponge","A fish","A cloud"], answer: "A towel" },
-  { q: "What has keys but no locks?", choices: ["A piano","A map","A house","A car"], answer: "A piano" },
-  { q: "What has a face and two hands but no arms or legs?", choices: ["A clock","A doll","A robot","A statue"], answer: "A clock" },
-  { q: "The more you take, the more you leave behind. What am I?", choices: ["Footsteps","Time","Money","Memories"], answer: "Footsteps" }
+  {q:"What has keys but no locks?",a:"Piano",c:["Piano","Door","Robot","Car"]},
+  {q:"What gets wetter the more it dries?",a:"Towel",c:["Towel","Cloud","Fish","Sponge"]},
+  {q:"What has hands but no arms?",a:"Clock",c:["Clock","Human","Glove","Robot"]},
+  {q:"What comes once in a minute, twice in a moment, never in a thousand years?",a:"M",c:["M","O","Time","One"]}
 ];
 function riddleChallenge(box){
-  const r = RIDDLES[Math.floor(Math.random()*RIDDLES.length)];
-  const label = document.createElement('div');
-  label.style.fontSize='14px'; label.style.marginBottom='10px'; label.textContent = r.q;
-  box.appendChild(label);
-  const wrap = document.createElement('div');
-  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;';
-  r.choices.slice().sort(() => Math.random()-0.5).forEach(c => {
-    const b = document.createElement('button');
-    b.className = 'btn-secondary'; b.style.width = '100%'; b.textContent = c;
-    b.onclick = () => c === r.answer ? succeed() : failCaptcha("Incorrect. Humans know this one.");
-    wrap.appendChild(b);
+  const r = randomItem(RIDDLES);
+  addLabel(box, r.q);
+  addChoiceButtons(box, r.c.sort(()=>Math.random()-.5), x => x === r.a, "Wrong riddle.");
+}
+
+function explainChallenge(box){
+  addLabel(box, "Explain why you are human using at least 18 characters:");
+  const ta = document.createElement("textarea");
+  ta.rows = 3;
+  ta.placeholder = "I am human because...";
+  box.appendChild(ta);
+  const btn = addButton(box, "Submit");
+  btn.onclick = () => ta.value.trim().length >= 18 ? completeOneChallenge() : failCaptcha("Unconvincing.");
+}
+
+function tosChallenge(box){
+  addLabel(box, "Scroll to the bottom and agree.");
+  const scrollBox = document.createElement("div");
+  scrollBox.style.cssText = "width:100%;height:105px;overflow-y:auto;background:#0b0b0e;border:1px solid var(--border);border-radius:10px;padding:8px;font-size:11px;color:var(--muted);line-height:1.6";
+  scrollBox.innerHTML = Array.from({length:22}, (_,i)=>`<p>Clause ${i+1}: By continuing, you accept more verification than any normal person should tolerate.</p>`).join("");
+  box.appendChild(scrollBox);
+  const btn = addButton(box, "I Agree");
+  btn.disabled = true;
+  btn.style.opacity = ".5";
+  scrollBox.onscroll = () => {
+    if(scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 5){
+      btn.disabled = false;
+      btn.style.opacity = "1";
+    }
+  };
+  btn.onclick = () => !btn.disabled && completeOneChallenge();
+}
+
+function tinyTargetChallenge(box){
+  addLabel(box, "Click the tiny green dot.");
+  const zone = document.createElement("div");
+  zone.style.cssText = "position:relative;width:310px;height:120px;background:#0b0b0e;border:1px solid var(--border);border-radius:10px";
+  const dot = document.createElement("button");
+  dot.className = "tiny-target";
+  dot.style.position = "absolute";
+  dot.style.left = Math.floor(Math.random()*280 + 10) + "px";
+  dot.style.top = Math.floor(Math.random()*90 + 10) + "px";
+  dot.onclick = completeOneChallenge;
+  zone.appendChild(dot);
+  zone.onclick = e => { if(e.target !== dot) failCaptcha("Missed the tiny dot."); };
+  box.appendChild(zone);
+}
+
+function typingChallenge(box){
+  const phrases = ["not a robot", "music is pain", "verify me again", "captcha overload"];
+  const phrase = randomItem(phrases);
+  addLabel(box, `Type this exactly: "${phrase}"`);
+  const input = addInput(box, "text", phrase);
+  const btn = addButton(box, "Submit");
+  btn.onclick = () => input.value.trim() === phrase ? completeOneChallenge() : failCaptcha("Typing mismatch.");
+}
+
+function fakeAdChallenge(box){
+  addLabel(box, "Click SKIP, not the fake download.");
+  const wrap = document.createElement("div");
+  wrap.style.cssText = "display:flex;gap:10px;flex-wrap:wrap;justify-content:center";
+  const buttons = ["DOWNLOAD NOW", "FREE ROBUX", "SKIP", "CLAIM PRIZE"].sort(()=>Math.random()-.5);
+  buttons.forEach(t => {
+    const b = addButton(wrap, t);
+    if(t !== "SKIP") b.className = "btn btn-secondary";
+    b.onclick = () => t === "SKIP" ? completeOneChallenge() : failCaptcha("You clicked the fake ad.");
   });
   box.appendChild(wrap);
 }
 
-/* --- challenge: explain why you're human --- */
-function explainChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = "Explain, in your own words, why you are a human:";
-  box.appendChild(label);
-  const ta = document.createElement('textarea');
-  ta.rows = 3;
-  ta.style.cssText = 'width:100%;background:#0f0f11;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-size:13px;resize:none;';
-  box.appendChild(ta);
-  const btn = document.createElement('button');
-  btn.className = 'btn'; btn.textContent = 'Submit'; btn.style.marginTop = '8px';
-  btn.onclick = () => ta.value.trim().length >= 10 ? succeed() : failCaptcha("Try harder. Convince us.");
-  box.appendChild(btn);
+function colorWordChallenge(box){
+  const words = [
+    {word:"GREEN", color:"red", answer:"word"},
+    {word:"RED", color:"green", answer:"word"},
+    {word:"BLUE", color:"yellow", answer:"word"},
+    {word:"YELLOW", color:"blue", answer:"word"}
+  ];
+  const item = randomItem(words);
+  addLabel(box, "Click the written word, not the colour.");
+  const text = document.createElement("div");
+  text.textContent = item.word;
+  text.style.cssText = `font-size:32px;font-weight:900;color:${item.color}`;
+  box.appendChild(text);
+  addChoiceButtons(box, ["GREEN","RED","BLUE","YELLOW"], x => x === item.word, "You followed the colour, not the word.");
 }
 
-/* --- challenge: scroll the terms, then agree --- */
-function tosChallenge(box){
-  const label = document.createElement('div');
-  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
-  label.textContent = "Scroll to the bottom and agree.";
+function captchaWithinCaptchaChallenge(box){
+  addLabel(box, "Mini CAPTCHA: tick the box, then press confirm.");
+  const row = document.createElement("label");
+  row.style.cssText = "display:flex;align-items:center;gap:10px;background:#fff;color:#111;padding:12px 18px;border-radius:8px;border:1px solid #ccc";
+  const cb = document.createElement("input");
+  cb.type = "checkbox";
+  row.append(cb, document.createTextNode("I'm not a robot"));
+  box.appendChild(row);
+  const btn = addButton(box, "Confirm");
+  btn.onclick = () => cb.checked ? completeOneChallenge() : failCaptcha("You forgot the box.");
+}
+
+/* helpers */
+function addLabel(box, text){
+  const label = document.createElement("div");
+  label.className = "captcha-label";
+  label.style.cssText = "font-size:13px;color:var(--muted);text-align:center;line-height:1.5";
+  label.textContent = text;
   box.appendChild(label);
-  const scrollBox = document.createElement('div');
-  scrollBox.style.cssText = 'width:100%;height:90px;overflow-y:auto;background:#0f0f11;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;color:var(--text-dim);line-height:1.6;';
-  scrollBox.innerHTML = Array.from({length:14}, (_,i) => `<p>Clause ${i+1}: By continuing you agree this music player may, at its sole discretion, ask you to prove you are human at any time, for any reason, repeatedly.</p>`).join('');
-  box.appendChild(scrollBox);
-  const btn = document.createElement('button');
-  btn.className = 'btn'; btn.textContent = "I Agree, I'm Human"; btn.disabled = true;
-  btn.style.cssText = 'margin-top:8px;opacity:0.5;';
-  box.appendChild(btn);
-  scrollBox.addEventListener('scroll', () => {
-    if(scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 4){
-      btn.disabled = false; btn.style.opacity = '1';
-    }
+  return label;
+}
+function addHint(box, text){
+  const h = document.createElement("div");
+  h.className = "hint";
+  h.textContent = text;
+  box.appendChild(h);
+  return h;
+}
+function addButton(parent, text){
+  const btn = document.createElement("button");
+  btn.className = "btn";
+  btn.textContent = text;
+  parent.appendChild(btn);
+  return btn;
+}
+function addInput(parent, type, placeholder){
+  const input = document.createElement("input");
+  input.type = type;
+  input.placeholder = placeholder || "";
+  input.autocomplete = "off";
+  input.style.maxWidth = "260px";
+  parent.appendChild(input);
+  setTimeout(()=>input.focus(),50);
+  return input;
+}
+function addChoiceButtons(box, choices, isCorrect, failMsg){
+  const grid = document.createElement("div");
+  grid.className = "choice-grid";
+  choices.forEach((ch, idx) => {
+    const b = document.createElement("button");
+    b.textContent = ch;
+    if(String(ch).length > 2) b.style.cssText = "width:auto;min-width:76px;padding:0 10px;font-size:13px";
+    b.onclick = () => isCorrect(ch, idx) ? completeOneChallenge() : failCaptcha(failMsg);
+    grid.appendChild(b);
   });
-  btn.onclick = () => { if(!btn.disabled) succeed(); };
+  box.appendChild(grid);
 }
 
 /* =========================================================
-   VOLUME SLIDER -> REAL EMAIL VERIFICATION (EmailJS)
+   VOLUME EMAIL VERIFICATION — normal 15 min code, no 30 sec
    ========================================================= */
 let pendingCode = null;
 let pendingExpiry = 0;
 let pendingVolumeRequest = null;
 let countdownTimer = null;
 
-volumeSlider.addEventListener('change', (e) => {
+volumeSlider.addEventListener("change", e => {
   pendingVolumeRequest = e.target.value;
-  e.target.value = lastSliderDisplay; // snap back until verified
+  e.target.value = lastSliderDisplay;
   openVerifyModal();
 });
 
 function openVerifyModal(){
-  verifyStep1.style.display = 'block';
-  verifyStep2.style.display = 'none';
-  sendStatus.textContent = '';
-  checkStatus.textContent = '';
-  verifyCode.value = '';
-  verifyOverlay.classList.remove('hidden');
+  verifyStep1.style.display = "block";
+  verifyStep2.style.display = "none";
+  sendStatus.textContent = "";
+  checkStatus.textContent = "";
+  verifyCode.value = "";
+  verifyOverlay.classList.remove("hidden");
 }
 function closeVerifyModal(){
-  verifyOverlay.classList.add('hidden');
+  verifyOverlay.classList.add("hidden");
   clearInterval(countdownTimer);
 }
-cancelVerifyBtn.addEventListener('click', () => {
-  pendingVolumeRequest = null;
-  closeVerifyModal();
-});
+cancelVerifyBtn.onclick = closeVerifyModal;
+closeVerifyBtn.onclick = closeVerifyModal;
 
-sendCodeBtn.addEventListener('click', () => {
+sendCodeBtn.onclick = () => sendVolumeCode();
+
+function sendVolumeCode(){
   const email = verifyEmail.value.trim();
   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
     sendStatus.textContent = "That doesn't look like a real email.";
-    sendStatus.className = 'status-line error';
+    sendStatus.className = "status-line error";
     return;
   }
+
   pendingCode = String(Math.floor(100000 + Math.random()*900000));
   sendCodeBtn.disabled = true;
-  sendStatus.textContent = 'Sending...';
-  sendStatus.className = 'status-line';
+  sendStatus.textContent = "Sending...";
+  sendStatus.className = "status-line";
 
-  const expiryDate = new Date(Date.now() + 15*60000); // 15 minute expiry
-  const expiryLabel = expiryDate.toLocaleTimeString([], {hour:'numeric', minute:'2-digit'});
+  const expiryDate = new Date(Date.now() + 15*60000);
+  const expiryLabel = expiryDate.toLocaleTimeString([], {hour:"numeric", minute:"2-digit"});
 
   emailjs.send(EMAILJS_SERVICE_ID, EMAILJS_TEMPLATE_ID, {
     email: email,
@@ -1199,16 +1568,16 @@ sendCodeBtn.addEventListener('click', () => {
   }).then(() => {
     sendCodeBtn.disabled = false;
     sentToEmail.textContent = email;
-    verifyStep1.style.display = 'none';
-    verifyStep2.style.display = 'block';
+    verifyStep1.style.display = "none";
+    verifyStep2.style.display = "block";
     pendingExpiry = expiryDate.getTime();
     startCountdown();
   }).catch(err => {
     sendCodeBtn.disabled = false;
-    sendStatus.textContent = 'Failed to send: ' + (err && (err.text || err.message) ? (err.text || err.message) : 'unknown error') + ' — check the EmailJS keys in the code.';
-    sendStatus.className = 'status-line error';
+    sendStatus.textContent = "Failed to send: " + (err?.text || err?.message || "unknown error") + " — check EmailJS keys/template.";
+    sendStatus.className = "status-line error";
   });
-});
+}
 
 function startCountdown(){
   resendBtn.disabled = true;
@@ -1217,35 +1586,35 @@ function startCountdown(){
     const remainingSec = Math.max(0, Math.ceil((pendingExpiry - Date.now())/1000));
     const m = Math.floor(remainingSec/60);
     const s = remainingSec % 60;
-    expiryHint.textContent = remainingSec > 0 ? `Expires in ${m}:${String(s).padStart(2,'0')}` : 'Code expired.';
+    expiryHint.textContent = remainingSec > 0 ? `Expires in ${m}:${String(s).padStart(2,"0")}` : "Code expired.";
     if(remainingSec <= 0){
       clearInterval(countdownTimer);
       resendBtn.disabled = false;
     }
   }, 1000);
 }
-resendBtn.addEventListener('click', () => { sendCodeBtn.click(); });
+resendBtn.onclick = sendVolumeCode;
 
-checkCodeBtn.addEventListener('click', () => {
+checkCodeBtn.onclick = () => {
   const entered = verifyCode.value.trim();
   if(Date.now() > pendingExpiry){
-    checkStatus.textContent = 'Code expired. Resend a new one.';
-    checkStatus.className = 'status-line error';
+    checkStatus.textContent = "Code expired. Resend a new one.";
+    checkStatus.className = "status-line error";
     return;
   }
   if(entered === pendingCode){
-    checkStatus.textContent = 'Verified ✅';
-    checkStatus.className = 'status-line ok';
-    applyVolume(pendingVolumeRequest);
-    setTimeout(closeVerifyModal, 500);
+    checkStatus.textContent = "Email verified. Now do the extra checks.";
+    checkStatus.className = "status-line ok";
+    closeVerifyModal();
+    showCaptchaChain("Change volume", () => applyVolume(pendingVolumeRequest), 1);
   } else {
-    checkStatus.textContent = 'Incorrect code. Try again.';
-    checkStatus.className = 'status-line error';
-    verifyModal.classList.remove('shake');
+    checkStatus.textContent = "Incorrect code.";
+    checkStatus.className = "status-line error";
+    verifyModal.classList.remove("shake");
     void verifyModal.offsetWidth;
-    verifyModal.classList.add('shake');
+    verifyModal.classList.add("shake");
   }
-});
+};
 
 function applyVolume(val){
   const v = Math.max(0, Math.min(100, parseInt(val,10) || 0));
@@ -1257,34 +1626,34 @@ function applyVolume(val){
 }
 
 /* =========================================================
-   YOUTUBE (hidden, audio only)
+   YOUTUBE
    ========================================================= */
-const ytTag = document.createElement('script');
-ytTag.src = 'https://www.youtube.com/iframe_api';
+const ytTag = document.createElement("script");
+ytTag.src = "https://www.youtube.com/iframe_api";
 document.body.appendChild(ytTag);
 
 window.onYouTubeIframeAPIReady = function(){
-  ytPlayer = new YT.Player('ytPlayerHost', {
-    height: '1', width: '1',
-    playerVars: { autoplay: 0, controls: 0, disablekb: 1, modestbranding: 1 },
-    events: {
-      onReady: () => { ytReady = true; },
-      onStateChange: onYTStateChange
+  ytPlayer = new YT.Player("ytPlayerHost", {
+    height:"1",
+    width:"1",
+    playerVars:{autoplay:0,controls:0,disablekb:1,modestbranding:1},
+    events:{
+      onReady:()=>{ytReady=true},
+      onStateChange:onYTStateChange
     }
   });
 };
 function onYTStateChange(e){
-  if(e.data === YT.PlayerState.ENDED) goNext();
+  if(e.data === YT.PlayerState.ENDED) secureAction("Song changed", goNext, 1);
   if(e.data === YT.PlayerState.PLAYING){ isPlaying = true; updateNowPlayingUI(); }
   if(e.data === YT.PlayerState.PAUSED){ isPlaying = false; updateNowPlayingUI(); }
 }
-
 function extractYouTubeId(url){
   try{
     const u = new URL(url.trim());
-    if(u.hostname.includes('youtu.be')) return u.pathname.slice(1,12) || null;
-    if(u.hostname.includes('youtube.com')){
-      if(u.searchParams.get('v')) return u.searchParams.get('v');
+    if(u.hostname.includes("youtu.be")) return u.pathname.slice(1,12) || null;
+    if(u.hostname.includes("youtube.com")){
+      if(u.searchParams.get("v")) return u.searchParams.get("v");
       const m = u.pathname.match(/\/(embed|shorts)\/([A-Za-z0-9_-]{11})/);
       if(m) return m[2];
     }
@@ -1296,56 +1665,99 @@ function extractYouTubeId(url){
    TRACKS
    ========================================================= */
 function uid(){ return Math.random().toString(36).slice(2,10); }
+function secureAction(label, action, extra = 0){
+  showCaptchaChain(label, action, extra);
+}
 
-fileInput.addEventListener('change', (e) => {
-  Array.from(e.target.files).forEach(f => {
-    tracks.push({
-      id: uid(), type: 'file', src: URL.createObjectURL(f),
-      title: f.name.replace(/\.(mp3|mpeg)$/i,''), artist: 'Uploaded file', duration: null
+fileInput.addEventListener("change", e => {
+  const files = Array.from(e.target.files);
+  if(!files.length) return;
+  secureAction("Upload MP3", () => {
+    files.forEach(f => {
+      tracks.push({
+        id:uid(),
+        type:"file",
+        src:URL.createObjectURL(f),
+        title:f.name.replace(/\.(mp3|mpeg)$/i,""),
+        artist:"Uploaded file",
+        duration:null
+      });
     });
-  });
-  e.target.value = '';
-  renderTrackList();
+    e.target.value = "";
+    renderTrackList();
+  }, 1);
 });
 
-addYtBtn.addEventListener('click', async () => {
+addYtBtn.addEventListener("click", async () => {
   const url = ytInput.value.trim();
   const id = extractYouTubeId(url);
-  if(!id){ alert("That doesn't look like a YouTube link, robot."); return; }
-  let title = 'YouTube Track';
-  try{
-    const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
-    if(res.ok){ const data = await res.json(); if(data.title) title = data.title; }
-  }catch(err){}
-  tracks.push({ id: uid(), type: 'yt', ytId: id, title, artist: 'YouTube (audio only)', duration: null });
-  ytInput.value = '';
-  renderTrackList();
+  if(!id){ alert("That doesn't look like a YouTube link."); return; }
+
+  secureAction("Add YouTube link", async () => {
+    let title = "YouTube Track";
+    try{
+      const res = await fetch(`https://www.youtube.com/oembed?url=${encodeURIComponent(url)}&format=json`);
+      if(res.ok){
+        const data = await res.json();
+        if(data.title) title = data.title;
+      }
+    }catch(err){}
+    tracks.push({id:uid(),type:"yt",ytId:id,title,artist:"YouTube audio only",duration:null});
+    ytInput.value = "";
+    renderTrackList();
+  }, premiumActive ? 0 : 1);
 });
 
 function renderTrackList(){
   trackCountLabel.textContent = `(${tracks.length})`;
   if(tracks.length === 0){
-    trackListEl.innerHTML = '<div class="empty-state">No tracks yet. Upload an mp3 or paste a YouTube link above.</div>';
+    trackListEl.innerHTML = '<div class="empty-state">No tracks yet. Upload an MP3 or paste a YouTube link above.</div>';
+    renderLibraryList();
+    renderSearchResults();
     return;
   }
-  trackListEl.innerHTML = '';
-  tracks.forEach((t, i) => {
-    const row = document.createElement('div');
-    row.className = 'track-row' + (i === currentIndex ? ' playing' : '');
-    row.innerHTML = `
-      <div class="track-idx">${i === currentIndex && isPlaying ? '▶' : i+1}</div>
-      <div class="track-title">
-        <span class="name">${escapeHtml(t.title)}</span>
-        <span class="src">${t.type === 'yt' ? '▶️ YouTube' : '📁 MP3'} · ${escapeHtml(t.artist)}</span>
-      </div>
-      <div class="track-dur">${t.duration ? formatTime(t.duration) : '--:--'}</div>
-      <div></div>
-    `;
-    row.addEventListener('click', () => playTrackAt(i));
-    trackListEl.appendChild(row);
+  trackListEl.innerHTML = "";
+  tracks.forEach((t,i)=>{
+    trackListEl.appendChild(makeTrackRow(t, i));
   });
+  renderLibraryList();
+  renderSearchResults();
 }
-function escapeHtml(s){ const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function makeTrackRow(t, i){
+  const row = document.createElement("div");
+  row.className = "track-row" + (i === currentIndex ? " playing" : "");
+  row.innerHTML = `
+    <div class="track-idx">${i === currentIndex && isPlaying ? "▶" : i+1}</div>
+    <div class="track-title">
+      <span class="name">${escapeHtml(t.title)}</span>
+      <span class="src">${t.type === "yt" ? "▶️ YouTube" : "📁 MP3"} · ${escapeHtml(t.artist)}</span>
+    </div>
+    <div class="track-dur">${t.duration ? formatTime(t.duration) : "--:--"}</div>
+    <button class="btn-secondary delete-btn" style="font-size:11px;padding:6px 8px;border-radius:999px">Delete</button>
+  `;
+  row.addEventListener("click", e => {
+    if(e.target.classList.contains("delete-btn")) return;
+    secureAction("Play selected track", () => playTrackAt(i), premiumActive ? 0 : 1);
+  });
+  row.querySelector(".delete-btn").addEventListener("click", e => {
+    e.stopPropagation();
+    secureAction("Delete track", () => {
+      tracks.splice(i,1);
+      if(currentIndex === i){ stopAll(); currentIndex = -1; }
+      if(currentIndex > i) currentIndex--;
+      renderTrackList();
+      updateNowPlayingUI();
+    }, premiumActive ? 0 : 1);
+  });
+  return row;
+}
+
+function escapeHtml(s){
+  const d = document.createElement("div");
+  d.textContent = s;
+  return d.innerHTML;
+}
 
 /* =========================================================
    PLAYBACK
@@ -1358,16 +1770,16 @@ function playTrackAt(index){
   audioEl.pause();
   if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
 
-  if(track.type === 'file'){
+  if(track.type === "file"){
     audioEl.src = track.src;
     audioEl.currentTime = 0;
     audioEl.volume = actualVolume;
     audioEl.play();
-    activeEngine = 'audio';
+    activeEngine = "audio";
     isPlaying = true;
   } else {
-    if(!ytReady){ alert('YouTube player still warming up — try again in a second.'); return; }
-    activeEngine = 'yt';
+    if(!ytReady){ alert("YouTube player is still loading. Try again in a second."); return; }
+    activeEngine = "yt";
     ytPlayer.loadVideoById(track.ytId);
     ytPlayer.setVolume(Math.round(actualVolume*100));
     isPlaying = true;
@@ -1375,80 +1787,98 @@ function playTrackAt(index){
   updateNowPlayingUI();
   renderTrackList();
 }
-
+function stopAll(){
+  audioEl.pause();
+  if(ytPlayer && ytPlayer.stopVideo) ytPlayer.stopVideo();
+  isPlaying = false;
+}
 function goNext(){
   if(tracks.length === 0) return;
-  const next = (currentIndex + 1) % tracks.length;
-  playTrackAt(next);
+  playTrackAt((currentIndex + 1) % tracks.length);
 }
 function goPrev(){
   if(tracks.length === 0) return;
-  const prev = (currentIndex - 1 + tracks.length) % tracks.length;
-  playTrackAt(prev);
+  playTrackAt((currentIndex - 1 + tracks.length) % tracks.length);
 }
 
-playPauseBtn.addEventListener('click', () => {
-  if(currentIndex === -1){ if(tracks.length) playTrackAt(0); return; }
-  if(isPlaying){
-    if(activeEngine === 'audio') audioEl.pause();
-    else if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
-    isPlaying = false;
-  } else {
-    if(activeEngine === 'audio') audioEl.play();
-    else if(ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
-    isPlaying = true;
-  }
-  updateNowPlayingUI();
+playPauseBtn.addEventListener("click", () => {
+  secureAction(isPlaying ? "Pause music" : "Play music", () => {
+    if(currentIndex === -1){
+      if(tracks.length) playTrackAt(0);
+      return;
+    }
+    if(isPlaying){
+      if(activeEngine === "audio") audioEl.pause();
+      else if(ytPlayer && ytPlayer.pauseVideo) ytPlayer.pauseVideo();
+      isPlaying = false;
+    } else {
+      if(activeEngine === "audio") audioEl.play();
+      else if(ytPlayer && ytPlayer.playVideo) ytPlayer.playVideo();
+      isPlaying = true;
+    }
+    updateNowPlayingUI();
+  });
 });
-nextBtn.addEventListener('click', goNext);
-prevBtn.addEventListener('click', goPrev);
 
-audioEl.addEventListener('ended', goNext);
-audioEl.addEventListener('timeupdate', () => {
-  if(activeEngine === 'audio') updateProgressUI(audioEl.currentTime, audioEl.duration || 0);
+nextBtn.addEventListener("click", () => secureAction("Skip next", goNext, 1));
+prevBtn.addEventListener("click", () => secureAction("Skip previous", goPrev, 1));
+
+audioEl.addEventListener("ended", () => secureAction("Song changed", goNext, 1));
+audioEl.addEventListener("timeupdate", () => {
+  if(activeEngine === "audio") updateProgressUI(audioEl.currentTime, audioEl.duration || 0);
 });
-audioEl.addEventListener('play', () => { isPlaying = true; updateNowPlayingUI(); });
-audioEl.addEventListener('pause', () => { isPlaying = false; updateNowPlayingUI(); });
+audioEl.addEventListener("play", () => { isPlaying = true; updateNowPlayingUI(); });
+audioEl.addEventListener("pause", () => { isPlaying = false; updateNowPlayingUI(); });
 
 setInterval(() => {
-  if(activeEngine === 'yt' && ytPlayer && ytPlayer.getCurrentTime){
+  if(activeEngine === "yt" && ytPlayer && ytPlayer.getCurrentTime){
     updateProgressUI(ytPlayer.getCurrentTime() || 0, ytPlayer.getDuration() || 0);
   }
 }, 500);
 
-progressTrack.addEventListener('click', (e) => {
+setInterval(() => {
+  if(isPlaying){
+    if(premiumActive && Math.random() < 0.65) return;
+    secureAction("Random listening check", () => {}, premiumActive ? 0 : 1);
+  }
+}, 180000);
+
+progressTrack.addEventListener("click", e => {
   if(currentIndex === -1) return;
   const rect = progressTrack.getBoundingClientRect();
   const pct = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
-  if(activeEngine === 'audio' && audioEl.duration){
-    audioEl.currentTime = pct * audioEl.duration;
-  } else if(activeEngine === 'yt' && ytPlayer && ytPlayer.getDuration){
-    ytPlayer.seekTo(pct * ytPlayer.getDuration(), true);
-  }
+  secureAction("Seek track", () => {
+    if(activeEngine === "audio" && audioEl.duration){
+      audioEl.currentTime = pct * audioEl.duration;
+    } else if(activeEngine === "yt" && ytPlayer && ytPlayer.getDuration){
+      ytPlayer.seekTo(pct * ytPlayer.getDuration(), true);
+    }
+  }, 1);
 });
 
-function updateProgressUI(cur, dur){
+function updateProgressUI(cur,dur){
   curTimeEl.textContent = formatTime(cur);
   durTimeEl.textContent = formatTime(dur);
-  progressFill.style.width = dur ? `${(cur/dur)*100}%` : '0%';
+  progressFill.style.width = dur ? `${(cur/dur)*100}%` : "0%";
 }
 function formatTime(s){
   if(!isFinite(s) || s < 0) s = 0;
-  const m = Math.floor(s/60), sec = Math.floor(s%60);
-  return `${m}:${String(sec).padStart(2,'0')}`;
+  const m = Math.floor(s/60);
+  const sec = Math.floor(s%60);
+  return `${m}:${String(sec).padStart(2,"0")}`;
 }
 function updateNowPlayingUI(){
   if(currentIndex === -1){
-    npTitle.textContent = 'Nothing playing';
-    npArtist.textContent = 'Add a track to get started';
-    artBox.textContent = '💿';
+    npTitle.textContent = "Nothing playing";
+    npArtist.textContent = "Add a track to start suffering";
+    artBox.textContent = "💿";
   } else {
     const t = tracks[currentIndex];
     npTitle.textContent = t.title;
     npArtist.textContent = t.artist;
-    artBox.textContent = t.type === 'yt' ? '▶️' : '🎵';
+    artBox.textContent = t.type === "yt" ? "▶️" : "🎵";
   }
-  playPauseBtn.textContent = isPlaying ? '⏸' : '▶';
+  playPauseBtn.textContent = isPlaying ? "⏸" : "▶";
   renderTrackList();
 }
 </script>
