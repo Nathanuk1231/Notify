@@ -537,10 +537,23 @@ const CAPTCHA_SUBS = [
   "Are you a robot? Be honest. We'll know."
 ];
 
+let challengeCleanups = [];
+function trackCleanup(fn){ challengeCleanups.push(fn); }
+function clearChallengeCleanups(){
+  challengeCleanups.forEach(fn => { try{ fn(); }catch(e){} });
+  challengeCleanups = [];
+}
+
 function renderRandomChallenge(){
+  clearChallengeCleanups();
   captchaSub.textContent = CAPTCHA_SUBS[Math.floor(Math.random()*CAPTCHA_SUBS.length)];
   challengeBox.innerHTML = '';
-  const challenges = [mathChallenge, humanPickChallenge, backwardsChallenge, holdChallenge, runawayChallenge, sliderChallenge, wheelChallenge];
+  const challenges = [
+    mathChallenge, humanPickChallenge, backwardsChallenge, holdChallenge, runawayChallenge, sliderChallenge, wheelChallenge,
+    shadeChallenge, swapChallenge, mirrorMathChallenge, trafficLightChallenge, simonChallenge, memorizeNumberChallenge,
+    noClickChallenge, timingChallenge, progressZoneChallenge, dialChallenge, puzzleChallenge, riddleChallenge,
+    explainChallenge, tosChallenge
+  ];
   const fn = challenges[Math.floor(Math.random()*challenges.length)];
   fn(challengeBox);
 }
@@ -723,6 +736,414 @@ function wheelChallenge(box){
       }
     }, 2200);
   };
+}
+
+/* --- challenge: spot the off-shade square --- */
+function shadeChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Click the square that\'s a different shade.';
+  box.appendChild(label);
+  const grid = document.createElement('div'); grid.className='choice-grid';
+  const total = 9;
+  const correctIndex = Math.floor(Math.random()*total);
+  for(let i=0;i<total;i++){
+    const sq = document.createElement('button');
+    sq.style.width='36px'; sq.style.height='36px'; sq.style.borderRadius='6px'; sq.style.border='1px solid var(--border)';
+    sq.style.background = `hsl(140, 65%, ${i===correctIndex ? 53 : 43}%)`;
+    sq.onclick = () => i===correctIndex ? succeed() : failCaptcha("Nope, identical. Look closer.");
+    grid.appendChild(sq);
+  }
+  box.appendChild(grid);
+}
+
+/* --- challenge: click the circle, not the square (they swap) --- */
+function swapChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Click the circle, not the square. They move.';
+  box.appendChild(label);
+  const zone = document.createElement('div');
+  zone.style.cssText = 'position:relative;width:240px;height:84px;';
+  const circle = document.createElement('button');
+  circle.style.cssText = 'position:absolute;width:44px;height:44px;border-radius:50%;background:var(--accent);border:none;cursor:pointer;transition:left .25s, top .25s;';
+  const square = document.createElement('button');
+  square.style.cssText = 'position:absolute;width:44px;height:44px;border-radius:6px;background:#55555a;border:none;cursor:pointer;transition:left .25s, top .25s;';
+  const slots = [{left:20,top:18},{left:170,top:18},{left:95,top:40}];
+  function place(){
+    const shuffled = slots.slice().sort(()=>Math.random()-0.5);
+    circle.style.left = shuffled[0].left+'px'; circle.style.top = shuffled[0].top+'px';
+    square.style.left = shuffled[1].left+'px'; square.style.top = shuffled[1].top+'px';
+  }
+  place();
+  const interval = setInterval(place, 600);
+  trackCleanup(() => clearInterval(interval));
+  circle.onclick = succeed;
+  square.onclick = () => failCaptcha("That was the square.");
+  zone.appendChild(circle); zone.appendChild(square);
+  box.appendChild(zone);
+}
+
+/* --- challenge: mirrored/upside-down math --- */
+function mirrorMathChallenge(box){
+  const a = 1 + Math.floor(Math.random()*6);
+  const b = 1 + Math.floor(Math.random()*6);
+  const answer = a + b;
+  const flipStyle = Math.random() < 0.5 ? 'scaleX(-1)' : 'rotate(180deg)';
+  const label = document.createElement('div');
+  label.style.fontSize = '13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Solve this (yes, it\'s upside down):';
+  box.appendChild(label);
+  const problem = document.createElement('div');
+  problem.style.fontSize = '20px';
+  problem.style.transform = flipStyle;
+  problem.textContent = `${a} + ${b} = ?`;
+  box.appendChild(problem);
+  const opts = new Set([answer]);
+  while(opts.size < 4) opts.add(Math.max(0, answer + Math.floor(Math.random()*7) - 3));
+  const grid = document.createElement('div'); grid.className = 'choice-grid';
+  [...opts].sort(()=>Math.random()-0.5).forEach(n=>{
+    const b2 = document.createElement('button');
+    b2.style.fontSize='16px'; b2.textContent = n;
+    b2.onclick = () => n === answer ? succeed() : failCaptcha("Wrong. Try reading it more carefully.");
+    grid.appendChild(b2);
+  });
+  box.appendChild(grid);
+}
+
+/* --- challenge: find the odd traffic light --- */
+function trafficLightChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Click the odd one out.';
+  box.appendChild(label);
+  const total = 9;
+  const oddIndex = Math.floor(Math.random()*total);
+  const grid = document.createElement('div'); grid.className = 'choice-grid';
+  for(let i=0;i<total;i++){
+    const b = document.createElement('button');
+    b.style.fontSize='20px';
+    b.textContent = i === oddIndex ? '🚥' : '🚦';
+    b.onclick = () => i === oddIndex ? succeed() : failCaptcha("Look again.");
+    grid.appendChild(b);
+  }
+  box.appendChild(grid);
+}
+
+/* --- challenge: Simon-says emoji sequence --- */
+function simonChallenge(box){
+  const palette = ['🔴','🟢','🔵','🟡'];
+  const seqLen = 3 + Math.floor(Math.random()*2);
+  const seq = Array.from({length:seqLen}, () => palette[Math.floor(Math.random()*palette.length)]);
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Watch closely...';
+  box.appendChild(label);
+  const display = document.createElement('div');
+  display.style.cssText = 'font-size:40px;height:50px;display:flex;align-items:center;justify-content:center;';
+  box.appendChild(display);
+  let i = 0;
+  function showNext(){
+    if(i >= seq.length){
+      display.textContent = '';
+      label.textContent = 'Now click them in the same order.';
+      renderInputGrid();
+      return;
+    }
+    display.textContent = seq[i];
+    i++;
+    const tNext = setTimeout(showNext, 700);
+    trackCleanup(() => clearTimeout(tNext));
+  }
+  const t0 = setTimeout(showNext, 500);
+  trackCleanup(() => clearTimeout(t0));
+  function renderInputGrid(){
+    const grid = document.createElement('div'); grid.className = 'choice-grid';
+    const userSeq = [];
+    palette.forEach(p => {
+      const b = document.createElement('button'); b.textContent = p;
+      b.onclick = () => {
+        userSeq.push(p);
+        const idx = userSeq.length - 1;
+        if(userSeq[idx] !== seq[idx]){ failCaptcha("Wrong order. Pay attention next time."); userSeq.length = 0; return; }
+        if(userSeq.length === seq.length) succeed();
+      };
+      grid.appendChild(b);
+    });
+    box.appendChild(grid);
+  }
+}
+
+/* --- challenge: memorize a 4-digit number --- */
+function memorizeNumberChallenge(box){
+  const num = String(Math.floor(1000 + Math.random()*9000));
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Memorize this number:';
+  box.appendChild(label);
+  const display = document.createElement('div');
+  display.style.cssText = 'font-size:28px;font-weight:700;';
+  display.textContent = num;
+  box.appendChild(display);
+  const t = setTimeout(() => {
+    display.textContent = '????';
+    const input = document.createElement('input');
+    input.type = 'text'; input.maxLength = 4;
+    input.style.width = '100px'; input.style.textAlign = 'center';
+    box.appendChild(input);
+    const btn = document.createElement('button');
+    btn.className = 'btn'; btn.textContent = 'Submit'; btn.style.marginTop = '8px';
+    btn.onclick = () => input.value.trim() === num ? succeed() : failCaptcha("Nope. A human would remember that.");
+    box.appendChild(btn);
+  }, 1200);
+  trackCleanup(() => clearTimeout(t));
+}
+
+/* --- challenge: do NOT click for 5 seconds --- */
+function noClickChallenge(box){
+  function start(){
+    box.innerHTML = '';
+    const label = document.createElement('div');
+    label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+    label.textContent = 'Do NOT click anything for 5 seconds. Just wait.';
+    box.appendChild(label);
+    const ring = document.createElement('div');
+    ring.style.cssText = 'font-size:30px;font-weight:700;';
+    ring.textContent = '5';
+    box.appendChild(ring);
+    let remaining = 5, failed = false;
+    const clickHandler = () => {
+      if(failed) return;
+      failed = true;
+      clearInterval(interval);
+      box.removeEventListener('click', clickHandler);
+      failCaptcha("You clicked! Patience, human.");
+      const retryBtn = document.createElement('button');
+      retryBtn.className = 'btn-secondary'; retryBtn.textContent = 'Try again'; retryBtn.style.marginTop = '10px';
+      retryBtn.onclick = (ev) => { ev.stopPropagation(); start(); };
+      box.appendChild(retryBtn);
+    };
+    box.addEventListener('click', clickHandler);
+    const interval = setInterval(() => {
+      remaining--;
+      ring.textContent = remaining;
+      if(remaining <= 0){
+        clearInterval(interval);
+        box.removeEventListener('click', clickHandler);
+        if(!failed) succeed();
+      }
+    }, 1000);
+    trackCleanup(() => { clearInterval(interval); box.removeEventListener('click', clickHandler); });
+  }
+  start();
+}
+
+/* --- challenge: click GO the instant it appears --- */
+function timingChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Click the button the instant it says GO. Too early or too late fails.';
+  box.appendChild(label);
+  const btn = document.createElement('button');
+  btn.className = 'btn'; btn.textContent = 'WAIT...'; btn.disabled = true; btn.style.marginTop = '10px';
+  box.appendChild(btn);
+  const delay = 1500 + Math.random()*2500;
+  let goShown = false, resultGiven = false;
+  const t = setTimeout(() => {
+    btn.disabled = false; btn.textContent = 'CLICK NOW';
+    goShown = true;
+    const t2 = setTimeout(() => {
+      if(goShown && !resultGiven){ resultGiven = true; btn.disabled = true; failCaptcha("Too slow."); }
+    }, 800);
+    trackCleanup(() => clearTimeout(t2));
+  }, delay);
+  trackCleanup(() => clearTimeout(t));
+  btn.onclick = () => {
+    if(resultGiven) return;
+    resultGiven = true;
+    if(!goShown) failCaptcha("Too early! That's exactly what a robot would do.");
+    else succeed();
+  };
+}
+
+/* --- challenge: stop the bar in the green zone --- */
+function progressZoneChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Click STOP when the bar is in the green zone.';
+  box.appendChild(label);
+  const track = document.createElement('div');
+  track.style.cssText = 'width:240px;height:14px;background:#222;border-radius:7px;position:relative;overflow:hidden;margin:10px 0;';
+  const zoneStart = 55 + Math.random()*10;
+  const zoneWidth = 12;
+  const zone = document.createElement('div');
+  zone.style.cssText = `position:absolute;left:${zoneStart}%;width:${zoneWidth}%;height:100%;background:rgba(30,215,96,0.35);`;
+  const fill = document.createElement('div');
+  fill.style.cssText = 'height:100%;background:var(--accent);width:0%;';
+  track.appendChild(zone); track.appendChild(fill);
+  box.appendChild(track);
+  const btn = document.createElement('button'); btn.className = 'btn'; btn.textContent = 'STOP';
+  box.appendChild(btn);
+  let pct = 0, dir = 1, raf;
+  function tick(){
+    pct += dir*1.4;
+    if(pct >= 100){ pct = 100; dir = -1; }
+    if(pct <= 0){ pct = 0; dir = 1; }
+    fill.style.width = pct + '%';
+    raf = requestAnimationFrame(tick);
+  }
+  raf = requestAnimationFrame(tick);
+  trackCleanup(() => cancelAnimationFrame(raf));
+  btn.onclick = () => {
+    cancelAnimationFrame(raf);
+    if(pct >= zoneStart && pct <= zoneStart + zoneWidth) succeed();
+    else {
+      failCaptcha("Missed the zone.");
+      pct = 0; raf = requestAnimationFrame(tick);
+      trackCleanup(() => cancelAnimationFrame(raf));
+    }
+  };
+}
+
+/* --- challenge: turn the dial to the human zone --- */
+function dialChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Drag the dial up/down until it says HUMAN, then release.';
+  box.appendChild(label);
+  const target = 60 + Math.floor(Math.random()*20);
+  const zoneLo = target, zoneHi = target + 10;
+  let value = Math.floor(Math.random()*40);
+  const dial = document.createElement('div');
+  dial.style.cssText = 'width:70px;height:70px;border-radius:50%;background:#1f1f22;border:3px solid var(--border);position:relative;cursor:grab;user-select:none;margin:6px 0;';
+  const needle = document.createElement('div');
+  needle.style.cssText = 'width:3px;height:28px;background:var(--accent);position:absolute;top:6px;left:50%;transform-origin:bottom center;';
+  dial.appendChild(needle);
+  box.appendChild(dial);
+  const valueLabel = document.createElement('div');
+  valueLabel.style.cssText = 'font-size:11px;color:var(--text-dim);';
+  box.appendChild(valueLabel);
+  function render(){
+    const angle = (value/100)*270 - 135;
+    needle.style.transform = `translateX(-50%) rotate(${angle}deg)`;
+    valueLabel.textContent = (value >= zoneLo && value <= zoneHi) ? 'HUMAN ✅' : 'keep turning...';
+  }
+  render();
+  let dragging = false, startY = 0, startVal = 0;
+  function onDown(e){ dragging = true; startY = e.clientY; startVal = value; dial.style.cursor = 'grabbing'; }
+  function onMove(e){
+    if(!dragging) return;
+    const delta = startY - e.clientY;
+    value = Math.max(0, Math.min(100, startVal + delta));
+    render();
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging = false; dial.style.cursor = 'grab';
+    if(value >= zoneLo && value <= zoneHi) succeed();
+    else failCaptcha("Not quite. Keep turning.");
+  }
+  dial.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  trackCleanup(() => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); });
+}
+
+/* --- challenge: drag the puzzle piece into the gap --- */
+function puzzleChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = 'Drag the piece into the gap.';
+  box.appendChild(label);
+  const track = document.createElement('div');
+  track.style.cssText = 'position:relative;width:240px;height:50px;background:#0f0f11;border:1px solid var(--border);border-radius:8px;';
+  const notchPos = 140 + Math.random()*60;
+  const notch = document.createElement('div');
+  notch.style.cssText = `position:absolute;left:${notchPos}px;top:5px;width:40px;height:40px;border:2px dashed var(--accent);border-radius:6px;`;
+  const piece = document.createElement('div');
+  piece.style.cssText = 'position:absolute;left:0px;top:5px;width:40px;height:40px;background:var(--accent);border-radius:6px;cursor:grab;';
+  track.appendChild(notch); track.appendChild(piece);
+  box.appendChild(track);
+  let dragging = false, startX = 0, startLeft = 0;
+  function onDown(e){ dragging = true; startX = e.clientX; startLeft = parseFloat(piece.style.left); piece.style.cursor = 'grabbing'; }
+  function onMove(e){
+    if(!dragging) return;
+    let newLeft = startLeft + (e.clientX - startX);
+    newLeft = Math.max(0, Math.min(200, newLeft));
+    piece.style.left = newLeft + 'px';
+  }
+  function onUp(){
+    if(!dragging) return;
+    dragging = false; piece.style.cursor = 'grab';
+    const pieceLeft = parseFloat(piece.style.left);
+    if(Math.abs(pieceLeft - notchPos) < 14) succeed();
+    else failCaptcha("Missed the gap.");
+  }
+  piece.addEventListener('mousedown', onDown);
+  window.addEventListener('mousemove', onMove);
+  window.addEventListener('mouseup', onUp);
+  trackCleanup(() => { window.removeEventListener('mousemove', onMove); window.removeEventListener('mouseup', onUp); });
+}
+
+/* --- challenge: riddle multiple choice --- */
+const RIDDLES = [
+  { q: "What gets wetter the more it dries?", choices: ["A towel","A sponge","A fish","A cloud"], answer: "A towel" },
+  { q: "What has keys but no locks?", choices: ["A piano","A map","A house","A car"], answer: "A piano" },
+  { q: "What has a face and two hands but no arms or legs?", choices: ["A clock","A doll","A robot","A statue"], answer: "A clock" },
+  { q: "The more you take, the more you leave behind. What am I?", choices: ["Footsteps","Time","Money","Memories"], answer: "Footsteps" }
+];
+function riddleChallenge(box){
+  const r = RIDDLES[Math.floor(Math.random()*RIDDLES.length)];
+  const label = document.createElement('div');
+  label.style.fontSize='14px'; label.style.marginBottom='10px'; label.textContent = r.q;
+  box.appendChild(label);
+  const wrap = document.createElement('div');
+  wrap.style.cssText = 'display:flex;flex-direction:column;gap:6px;width:100%;';
+  r.choices.slice().sort(() => Math.random()-0.5).forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'btn-secondary'; b.style.width = '100%'; b.textContent = c;
+    b.onclick = () => c === r.answer ? succeed() : failCaptcha("Incorrect. Humans know this one.");
+    wrap.appendChild(b);
+  });
+  box.appendChild(wrap);
+}
+
+/* --- challenge: explain why you're human --- */
+function explainChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = "Explain, in your own words, why you are a human:";
+  box.appendChild(label);
+  const ta = document.createElement('textarea');
+  ta.rows = 3;
+  ta.style.cssText = 'width:100%;background:#0f0f11;border:1px solid var(--border);color:var(--text);border-radius:8px;padding:8px;font-size:13px;resize:none;';
+  box.appendChild(ta);
+  const btn = document.createElement('button');
+  btn.className = 'btn'; btn.textContent = 'Submit'; btn.style.marginTop = '8px';
+  btn.onclick = () => ta.value.trim().length >= 10 ? succeed() : failCaptcha("Try harder. Convince us.");
+  box.appendChild(btn);
+}
+
+/* --- challenge: scroll the terms, then agree --- */
+function tosChallenge(box){
+  const label = document.createElement('div');
+  label.style.fontSize='13px'; label.style.color='var(--text-dim)';
+  label.textContent = "Scroll to the bottom and agree.";
+  box.appendChild(label);
+  const scrollBox = document.createElement('div');
+  scrollBox.style.cssText = 'width:100%;height:90px;overflow-y:auto;background:#0f0f11;border:1px solid var(--border);border-radius:8px;padding:8px;font-size:11px;color:var(--text-dim);line-height:1.6;';
+  scrollBox.innerHTML = Array.from({length:14}, (_,i) => `<p>Clause ${i+1}: By continuing you agree this music player may, at its sole discretion, ask you to prove you are human at any time, for any reason, repeatedly.</p>`).join('');
+  box.appendChild(scrollBox);
+  const btn = document.createElement('button');
+  btn.className = 'btn'; btn.textContent = "I Agree, I'm Human"; btn.disabled = true;
+  btn.style.cssText = 'margin-top:8px;opacity:0.5;';
+  box.appendChild(btn);
+  scrollBox.addEventListener('scroll', () => {
+    if(scrollBox.scrollTop + scrollBox.clientHeight >= scrollBox.scrollHeight - 4){
+      btn.disabled = false; btn.style.opacity = '1';
+    }
+  });
+  btn.onclick = () => { if(!btn.disabled) succeed(); };
 }
 
 /* =========================================================
